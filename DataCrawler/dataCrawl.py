@@ -36,6 +36,7 @@ def getData(baseurl):
             print(subPageUrl)
 
             #########调用subPageCrawl中的方法从subPageUrl中爬取数据########
+            getSubPageData(subPageUrl)
 
         time.sleep(random.randint(0,3))
     return datalist
