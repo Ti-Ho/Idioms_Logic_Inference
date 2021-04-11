@@ -16,6 +16,13 @@ from bs4 import BeautifulSoup
 
 findPage = re.compile(r'第 1/(.*?) 页')
 
+
+def getPageUrl(page, url):
+    urll = url[0:-5]
+    urlr = url[-5:]
+    return urll + urlr if page == 1 else urll + "_" + str(page) + urlr
+
+
 def getSubPageData(baseurl):
     datalist = []
     # 获取页数
@@ -23,11 +30,36 @@ def getSubPageData(baseurl):
     soup = BeautifulSoup(html, "html.parser")
     bottom = soup.select("#div_main_left > div")[1]
     # print(bottom)
-
     bottom = str(bottom)
-    page = re.findall(findPage, bottom)[0]
-    print(page)
+    pages = re.findall(findPage, bottom)[0]
+    # print(page)
+
+    # 解析每一页的数据
+    # TODO 解析单页数据
+    for page in range(1, int(pages) + 1):
+        url = getPageUrl(page, baseurl)
+        subPageHtml = askURL(url)
+        subPageSoup = BeautifulSoup(subPageHtml, "html.parser")
+        t_list = subPageSoup.select("#all > div")
+        # print(t_list)
+        # print(len(t_list))
+        for i, item in enumerate(t_list):
+            if item.em is None or item.a is None:
+                continue
+            print(str(i) + str(item))
+            print(item.em.text)
+            # TODO 多个<a>的处理
+            print(item.find_all("a"))
+            print(item.text)
+            print("---------------------------------------")
+            # print(item)
+            # print(str(i) + " " + item.text)
+            # if(item.text == ""):
+            #     continue
+            # print(type(item))
+
     return datalist
+
 
 # 得到指定URL的网页内容
 def askURL(url):
@@ -47,8 +79,11 @@ def askURL(url):
             print(e.reason)
     return html
 
+
 if __name__ == "__main__":
-    baseurl = "https://zaojv.com/4420198.html"
+    # baseurl = "https://zaojv.com/9669285.html"
+    # baseurl = "https://zaojv.com/6589307.html"  # 单页例子
+    baseurl = "https://zaojv.com/7562039.html"
     # 爬取子页面数据
     datalist = getSubPageData(baseurl)
     print("----------------------------数据爬取完毕----------------------------")
