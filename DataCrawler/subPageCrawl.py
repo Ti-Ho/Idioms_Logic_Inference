@@ -9,10 +9,19 @@
 从子页面中爬取含有多个成语的造句
 """
 
+import re
+import urllib.error
+import urllib.request
+from bs4 import BeautifulSoup
+from dataCrawl import askURL
+
 def getSubPageData(baseurl):
     datalist = []
+    # 获取页数
+    html = askURL(baseurl)
 
     return datalist
+
 
 if __name__ == "__main__":
     baseurl = "https://zaojv.com/9669285.html"

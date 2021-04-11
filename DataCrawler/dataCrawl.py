@@ -17,7 +17,7 @@ import urllib.request
 from bs4 import BeautifulSoup
 import time
 import random
-from subPageCrawl import *
+from subPageCrawl import getSubPageData
 
 findLink = re.compile(r'<a href="/(.*?)"')
 # 爬取网页
