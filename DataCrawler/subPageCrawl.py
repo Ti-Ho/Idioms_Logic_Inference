@@ -22,6 +22,10 @@ def getPageUrl(page, url):
     urlr = url[-5:]
     return urll + urlr if page == 1 else urll + "_" + str(page) + urlr
 
+def delChars(sentence):
+    sentence = re.sub(r'^(\d+)*(\.)*(\()*(\))*(（)*(）)*(、)*', "", sentence)
+    sentence = sentence.strip()
+    return sentence
 
 def getSubPageData(baseurl):
     datalist = []
@@ -35,28 +39,29 @@ def getSubPageData(baseurl):
     # print(page)
 
     # 解析每一页的数据
-    # TODO 解析单页数据
     for page in range(1, int(pages) + 1):
         url = getPageUrl(page, baseurl)
         subPageHtml = askURL(url)
         subPageSoup = BeautifulSoup(subPageHtml, "html.parser")
         t_list = subPageSoup.select("#all > div")
-        # print(t_list)
-        # print(len(t_list))
-        for i, item in enumerate(t_list):
+        for item in t_list:
             if item.em is None or item.a is None:
                 continue
-            print(str(i) + str(item))
-            print(item.em.text)
-            # TODO 多个<a>的处理
-            print(item.find_all("a"))
-            print(item.text)
+            # 成语
+            cy = []
+            cy.append(item.em.text)
+            for cyi in item.find_all("a"):
+                cy.append(cyi.text)
+            print(cy)
+            # 造句
+            sentence = item.text
+            sentence = delChars(sentence)
+            print(sentence)
             print("---------------------------------------")
-            # print(item)
-            # print(str(i) + " " + item.text)
-            # if(item.text == ""):
-            #     continue
-            # print(type(item))
+            if len(cy) == 1:
+                continue
+            # TODO 多成语处理成双成语
+            
 
     return datalist
 
@@ -81,9 +86,9 @@ def askURL(url):
 
 
 if __name__ == "__main__":
-    # baseurl = "https://zaojv.com/9669285.html"
+    baseurl = "https://zaojv.com/9669285.html"
     # baseurl = "https://zaojv.com/6589307.html"  # 单页例子
-    baseurl = "https://zaojv.com/7562039.html"
+    # baseurl = "https://zaojv.com/7562039.html"
     # 爬取子页面数据
     datalist = getSubPageData(baseurl)
-    print("----------------------------数据爬取完毕----------------------------")
+    print("----------------------------子页数据爬取完毕----------------------------")
