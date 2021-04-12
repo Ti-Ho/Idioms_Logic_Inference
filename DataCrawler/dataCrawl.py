@@ -20,9 +20,11 @@ import random
 from subPageCrawl import getSubPageData
 
 findLink = re.compile(r'<a href="/(.*?)"')
+
 # 爬取网页
 def getData(baseurl):
     datalist = []
+    all_set = set()
     for i in range(1, 29):
         print("****正在爬取第" + str(i) + "页****")
         url = baseurl + ("wordcy" if i == 1 else "wordcy_" + str(i)) + ".html"
@@ -32,11 +34,17 @@ def getData(baseurl):
         for item in soup.find_all(class_="dotline"):
             item = str(item)
             link = re.findall(findLink, item)[0]
-            subPageUrl = baseurl + link               # 获取到子页面url
-            print(subPageUrl)
-            # TODO 去重
+            subPageUrl = baseurl + link                 # 获取到子页面url
+            # print(subPageUrl)
             subPageData = getSubPageData(subPageUrl)
-            print(subPageData)
+            for subdata_i in subPageData:               # 去重
+                strcat1 = {subdata_i[0] + subdata_i[1]}
+                strcat2 = {subdata_i[1] + subdata_i[0]}
+                # print(strcat1)
+                # print(strcat2)
+                if(all_set & strcat1 == set() and all_set & strcat2 == set()):
+                    all_set = all_set | strcat1
+                    datalist.append(subdata_i)
         time.sleep(random.randint(0,3))
     return datalist
 
