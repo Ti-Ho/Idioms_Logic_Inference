@@ -23,7 +23,10 @@ def getPageUrl(page, url):
     return urll + urlr if page == 1 else urll + "_" + str(page) + urlr
 
 def delChars(sentence):
-    sentence = re.sub(r'^(\d+)*(\.)*(\()*(\))*(（)*(）)*(、)*', "", sentence)
+    sentence = re.sub(r'^(（)*(\()*', "", sentence)
+    sentence = sentence.strip()
+    sentence = re.sub(r'^(\d+)*(\.)*(\))*(）)*(、)*', "", sentence)
+    sentence = re.sub('(\d+)*([a-zA-Z]+)', "", sentence)
     sentence = sentence.strip()
     return sentence
 
@@ -52,17 +55,22 @@ def getSubPageData(baseurl):
             cy.append(item.em.text)
             for cyi in item.find_all("a"):
                 cy.append(cyi.text)
-            print(cy)
+            # print(cy)
             # 造句
             sentence = item.text
             sentence = delChars(sentence)
-            print(sentence)
-            print("---------------------------------------")
+            # print(sentence)
+            # print("---------------------------------------")
             if len(cy) == 1:
                 continue
-            # TODO 多成语处理成双成语
-            
-
+            for cyi in range(0, len(cy) - 1):
+                for cyj in range(cyi + 1, len(cy)):
+                    # print(cy[cyi] + "," + cy[cyj] + "," + sentence)
+                    data = []
+                    data.append(cy[cyi])
+                    data.append(cy[cyj])
+                    data.append(sentence)
+                    datalist.append(data)
     return datalist
 
 
@@ -91,4 +99,5 @@ if __name__ == "__main__":
     # baseurl = "https://zaojv.com/7562039.html"
     # 爬取子页面数据
     datalist = getSubPageData(baseurl)
+    print(datalist)
     print("----------------------------子页数据爬取完毕----------------------------")

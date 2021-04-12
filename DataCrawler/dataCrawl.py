@@ -34,10 +34,9 @@ def getData(baseurl):
             link = re.findall(findLink, item)[0]
             subPageUrl = baseurl + link               # 获取到子页面url
             print(subPageUrl)
-
-            #########调用subPageCrawl中的方法从subPageUrl中爬取数据########
-            getSubPageData(subPageUrl)
-
+            # TODO 去重
+            subPageData = getSubPageData(subPageUrl)
+            print(subPageData)
         time.sleep(random.randint(0,3))
     return datalist
 
