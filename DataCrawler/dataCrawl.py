@@ -30,11 +30,7 @@ def getData(baseurl):
         html = askURL(url)
         # 解析数据
         soup = BeautifulSoup(html, "html.parser")
-        cnt = 0
         for cyIndex, item in enumerate(soup.find_all(class_="dotline")):
-            cnt += 1
-            if cnt > 10:
-                break
             print("****正在爬取第{}页, 第{}个成语的数据****".format(str(i), str(cyIndex + 1)))
             datalist = []
             item = str(item)
@@ -77,7 +73,7 @@ def askURL(url):
 # 保存数据
 def saveData(datalist, i):
     data = pd.DataFrame(datalist)
-    savepath = "Data_" + str(i) + ".csv"
+    savepath = "MyData/Data_" + str(i) + ".csv"
     data.to_csv(savepath ,mode='a', index=False,header=None)
 
 
