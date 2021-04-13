@@ -18,25 +18,30 @@ from bs4 import BeautifulSoup
 import time
 import random
 from subPageCrawl import getSubPageData
+import pandas as pd
 
 findLink = re.compile(r'<a href="/(.*?)"')
 
 # 爬取网页
 def getData(baseurl):
-    datalist = []
     all_set = set()
     for i in range(1, 29):
-        print("****正在爬取第" + str(i) + "页****")
         url = baseurl + ("wordcy" if i == 1 else "wordcy_" + str(i)) + ".html"
         html = askURL(url)
         # 解析数据
         soup = BeautifulSoup(html, "html.parser")
-        for item in soup.find_all(class_="dotline"):
+        cnt = 0
+        for cyIndex, item in enumerate(soup.find_all(class_="dotline")):
+            cnt += 1
+            if cnt > 10:
+                break
+            print("****正在爬取第{}页, 第{}个成语的数据****".format(str(i), str(cyIndex + 1)))
+            datalist = []
             item = str(item)
             link = re.findall(findLink, item)[0]
             subPageUrl = baseurl + link                 # 获取到子页面url
             # print(subPageUrl)
-            subPageData = getSubPageData(subPageUrl)
+            subPageData = getSubPageData(subPageUrl)    # 获取子页面数据
             for subdata_i in subPageData:               # 去重
                 strcat1 = {subdata_i[0] + subdata_i[1]}
                 strcat2 = {subdata_i[1] + subdata_i[0]}
@@ -45,9 +50,10 @@ def getData(baseurl):
                 if(all_set & strcat1 == set() and all_set & strcat2 == set()):
                     all_set = all_set | strcat1
                     datalist.append(subdata_i)
+            # print(subPageData)
+            saveData(datalist, i)
         time.sleep(random.randint(0,3))
-    return datalist
-
+    # return datalist
 
 # 得到指定URL的网页内容
 def askURL(url):
@@ -69,16 +75,21 @@ def askURL(url):
 
 
 # 保存数据
-def saveData(datalist, savepath):
-    print("save")
+def saveData(datalist, i):
+    data = pd.DataFrame(datalist)
+    savepath = "Data_" + str(i) + ".csv"
+    data.to_csv(savepath ,mode='a', index=False,header=None)
 
 
 if __name__ == "__main__":
+    start = time.time()
     baseurl = "https://zaojv.com/"
     # 爬取数据
     datalist = getData(baseurl)
 
+    end = time.time()
+    print('Running time: %s Seconds' % (end - start))
     # 保存数据
-    # savepath = "CrawledData.cvs"
+    # savepath = "CrawledData.xls"
     # saveData(datalist, savepath)
     print("----------------------------数据爬取完毕----------------------------")
