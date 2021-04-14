@@ -37,6 +37,12 @@
 
 二分类：c1	c2	造句	0/1
 
+```
+并列关系 1
+转折关系 2
+因果关系 3
+```
+
 ### 3. 添加成语的举例(example)与解释(explanation)
 
 使用：[中华新华字典数据库](https://github.com/pwxcoo/chinese-xinhua)添加每个成语的举例与解释到数据中。

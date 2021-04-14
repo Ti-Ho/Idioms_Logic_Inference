@@ -22,6 +22,7 @@ import pandas as pd
 
 findLink = re.compile(r'<a href="/(.*?)"')
 
+
 # 爬取网页
 def getData(baseurl):
     all_set = set()
@@ -35,21 +36,23 @@ def getData(baseurl):
             datalist = []
             item = str(item)
             link = re.findall(findLink, item)[0]
-            subPageUrl = baseurl + link                 # 获取到子页面url
+            subPageUrl = baseurl + link  # 获取到子页面url
             # print(subPageUrl)
-            subPageData = getSubPageData(subPageUrl)    # 获取子页面数据
-            for subdata_i in subPageData:               # 去重
+            subPageData = getSubPageData(subPageUrl)  # 获取子页面数据
+            for subdata_i in subPageData:  # 去重
+                if len(subdata_i[0]) < 4 or len(subdata_i[1]) < 4:  # 去除成语长度小于4的脏数据
+                    continue
                 strcat1 = {subdata_i[0] + subdata_i[1]}
                 strcat2 = {subdata_i[1] + subdata_i[0]}
                 # print(strcat1)
                 # print(strcat2)
-                if(all_set & strcat1 == set() and all_set & strcat2 == set()):
+                if all_set & strcat1 == set() and all_set & strcat2 == set():
                     all_set = all_set | strcat1
                     datalist.append(subdata_i)
             # print(subPageData)
             saveData(datalist, i)
-        time.sleep(random.randint(0,3))
-    # return datalist
+        time.sleep(random.randint(0, 3))
+
 
 # 得到指定URL的网页内容
 def askURL(url):
@@ -74,14 +77,14 @@ def askURL(url):
 def saveData(datalist, i):
     data = pd.DataFrame(datalist)
     savepath = "MyData/Data_" + str(i) + ".csv"
-    data.to_csv(savepath ,mode='a', index=False,header=None)
+    data.to_csv(savepath, mode='a', index=False, header=None)
 
 
 if __name__ == "__main__":
     start = time.time()
     baseurl = "https://zaojv.com/"
     # 爬取数据
-    datalist = getData(baseurl)
+    getData(baseurl)
 
     end = time.time()
     print('Running time: %s Seconds' % (end - start))

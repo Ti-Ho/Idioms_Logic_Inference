@@ -25,7 +25,7 @@ def getPageUrl(page, url):
 def delChars(sentence):
     sentence = re.sub(r'^(（)*(\()*', "", sentence)                      # 去除前括号
     sentence = sentence.strip()
-    sentence = re.sub(r'^(\d+)*(\.)*(\))*(）)*(、)*', "", sentence)      # 去除数字 后括号 顿号
+    sentence = re.sub(r'^(\d+)*(\.)*(\))*(）)*(、)*(,)*(，)*', "", sentence)      # 去除数字 后括号 顿号
     sentence = re.sub('(\d+)*([a-zA-Z]+)', "", sentence)                 # 去除数字英文字母
     sentence = sentence.strip()                                          # 去除前后空格
     sentence = re.sub('(,)+', "，", sentence)                            # 去除英文逗号
