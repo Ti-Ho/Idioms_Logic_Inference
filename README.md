@@ -20,32 +20,34 @@
 
 * 注意**去重**
 
-* 保存为`.csv`格式的文件，将文件分开写入。
+* 保存为`.csv`格式的文件，将**暂存**放于`DataCrawler\MyData`中，将文件分开写入。
 
-* 爬取的数据`.csv`文件将存放于百度网盘。
+  爬取的数据`.csv`文件将**长期**存放于百度网盘。（由于大文件不适合上传到GitHub中）
 
   ```
   链接：https://pan.baidu.com/s/1IV6vaaFVFT90bOB7kxbvrQ 
   提取码：tiho
   ```
 
+
 ### 2. 人工打标签
 
-暂做**并列关系**与**转折关系**的逻辑关系推断 (可能添加**因果关系**的逻辑关系推断)
+* 暂做**并列关系**与**转折关系**的逻辑关系推断 (可能添加**因果关系**的逻辑关系推断)
 
-多分类：c1	c2	造句	0/1/2
+  多分类：c1	c2	造句	0/1/2
 
-二分类：c1	c2	造句	0/1
+  二分类：c1	c2	造句	0/1
 
-```
-并列关系 1
-转折关系 2
-因果关系 3
-```
+  ```
+  并列关系 1
+  转折关系 2
+  因果关系 3
+  ```
 
-由于`.csv`文件无法修改，所以将在`DataProcess.ipynb`中运行脚本将`.csv`转为`.xlsx`，方便打标签。
-
-**打完标签后**再运行`DataProcess.ipynb`中的脚本将`.xlsx`转为`.csv`文件。
+* 数据以及文件处理：
+  * 由于`.csv`文件无法修改，所以将在`DataProcess.ipynb`中运行脚本将`.csv`转为`.xlsx`，方便打标签，暂存于`DataCrawler\MyXlsx`。
+  * **打完标签后**再运行`DataProcess.ipynb`中的脚本将`.xlsx`转为`.csv`文件，暂存于`DataCrawler\MyCsv`。
+  * 数据中的`header`为`idiom1, idiom2, sentence, label`。（其中label为打标签时手动添加）
 
 ### 3. 添加成语的举例(example)与解释(explanation)
 
