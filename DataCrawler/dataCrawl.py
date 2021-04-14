@@ -31,6 +31,7 @@ def getData(baseurl):
         html = askURL(url)
         # 解析数据
         soup = BeautifulSoup(html, "html.parser")
+        firstItem = True
         for cyIndex, item in enumerate(soup.find_all(class_="dotline")):
             print("****正在爬取第{}页, 第{}个成语的数据****".format(str(i), str(cyIndex + 1)))
             datalist = []
@@ -50,7 +51,8 @@ def getData(baseurl):
                     all_set = all_set | strcat1
                     datalist.append(subdata_i)
             # print(subPageData)
-            saveData(datalist, i)
+            saveData(datalist, i, firstItem)
+            firstItem = False
         time.sleep(random.randint(0, 3))
 
 
@@ -74,10 +76,10 @@ def askURL(url):
 
 
 # 保存数据
-def saveData(datalist, i):
+def saveData(datalist, i, IsFirst):
     data = pd.DataFrame(datalist)
     savepath = "MyData/Data_" + str(i) + ".csv"
-    data.to_csv(savepath, mode='a', index=False, header=None)
+    data.to_csv(savepath, mode='a', index=False, header=['idiom1', 'idiom2', 'sentence'] if IsFirst else None)
 
 
 if __name__ == "__main__":
