@@ -44,9 +44,8 @@
   ```
   并列关系 1
   转折关系 2
-  因果关系 3
   ```
-
+  
 * 数据以及文件处理：
   * 由于`.csv`文件无法修改，所以将在`DataProcess.ipynb`中运行脚本将`.csv`转为`.xlsx`，方便打标签，暂存于`DataCrawler\MyXlsx`。
   * **打完标签后**再运行`DataProcess.ipynb`中的脚本将`.xlsx`转为`.csv`文件，暂存于`DataCrawler\MyCsv`。
