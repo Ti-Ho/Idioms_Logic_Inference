@@ -77,6 +77,8 @@ def askURL(url):
 
 # 保存数据
 def saveData(datalist, i, IsFirst):
+    if len(datalist) == 0:
+        return
     data = pd.DataFrame(datalist)
     savepath = "MyData/Data_" + str(i) + ".csv"
     data.to_csv(savepath, mode='a', index=False, header=['idiom1', 'idiom2', 'sentence'] if IsFirst else None)
