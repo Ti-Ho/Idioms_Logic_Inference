@@ -40,12 +40,13 @@
 
   多分类：c1	c2	造句	0/1/2
 
-  ```
+  ```latex
 并列关系 1
   转折关系 2
   ```
   
 * 数据以及文件处理：
+  
   * 由于`.csv`文件无法修改，所以将在`DataProcess.ipynb`中运行脚本将`.csv`转为`.xlsx`，方便打标签，暂存于`DataCrawler\MyXlsx`。
   * 数据中的`header`为`idiom1, idiom2, sentence, label`。（其中label为打标签时手动添加）
   
