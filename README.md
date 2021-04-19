@@ -122,7 +122,7 @@
 
   * [CLS]<成语1的解释>[SEP]<成语2的解释>[SEP]
 
-  * [CLS]<成语1的举例>[SEP]<成语2的举例>[SEP]  
+  * [CLS]<成语1的举例>[SEP]<成语2的举例>[SEP]
 
     (这种暂不可取 因为[中华新华字典数据库](https://github.com/pwxcoo/chinese-xinhua)中有的成语没有`example`)
 
