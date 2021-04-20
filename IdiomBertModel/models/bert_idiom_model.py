@@ -33,7 +33,8 @@ class Bert_Idiom_Analysis(nn.Module):
         # 在这里要解决的是多分类问题
         # predictions = self.dense(first_token_tensor)
         predictions_ = self.final_dense(first_token_tensor)
-        print("shape = {}".format(predictions_.shape))
+        
+        # print("shape = {}".format(predictions_.shape))  输出：shape = torch.Size([24, 3])
         # 用softmax函数做激活
         predictions = self.activation(predictions_)
         if labels is not None:
