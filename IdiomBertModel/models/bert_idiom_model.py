@@ -13,7 +13,8 @@ class Bert_Idiom_Analysis(nn.Module):
         super(Bert_Idiom_Analysis, self).__init__()
         self.bert = BertModel(config)
         self.final_dense = nn.Linear(config.hidden_size, 3)  # 将分为三个类 0/1/2
-        self.activation = nn.Softmax()                       # 使用Softmax激活函数
+        # Todo 不确定dim = 0还是dim = 1
+        self.activation = nn.Softmax(dim=1)                  # 使用Softmax激活函数
 
     def compute_loss(self, predictions, labels):
         criterion = nn.CrossEntropyLoss()
@@ -32,7 +33,7 @@ class Bert_Idiom_Analysis(nn.Module):
         # 在这里要解决的是多分类问题
         # predictions = self.dense(first_token_tensor)
         predictions_ = self.final_dense(first_token_tensor)
-
+        print("shape = {}".format(predictions_.shape))
         # 用softmax函数做激活
         predictions = self.activation(predictions_)
         if labels is not None:
