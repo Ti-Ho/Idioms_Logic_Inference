@@ -60,18 +60,16 @@ class IdiomDataset(Dataset):
     def get_text_and_label(self, item):
         # 获取文本和标记
         idiom1, idiom2, explanation1, example1, explanation2, example2, label = [i for i in self.lines[item]]
-        if explanation1 == "无":
-            explanation1 = ""
         if example1 == "无":
-            example1 = ""
-        if explanation2 == "无":
-            explanation2 = ""
+            sentence1 = explanation1
+        else:
+            sentence1 = explanation1 + str(example1)
+
         if example2 == "无":
-            example2 = ""
-        # print(idiom1)
-        # print(idiom2)
-        sentence1 = explanation1 + example1
-        sentence2 = explanation2 + example2
+            sentence2 = explanation2
+        else:
+            sentence2 = explanation2 + str(example2)
+        # print(sentence1 + " " + sentence2)
         return sentence1, sentence2, label
 
     def tokenize_char(self, segments):

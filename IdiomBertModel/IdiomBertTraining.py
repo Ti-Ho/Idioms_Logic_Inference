@@ -153,12 +153,16 @@ class IdiomTrainer:
                               bar_format="{l_bar}{r_bar}")
 
         total_loss = 0
+        """用于计算auc
         # 存储所有预测的结果和标记, 用来计算auc
         all_predictions, all_labels = [], []
-
+        """
+        train_acc = 0
+        num_correct = 0
+        num_now = 0
         for i, data in data_iter:
-            print("i:{}".format(i))
-            print("data:{}".format(data))
+            # print("i:{}".format(i))
+            # print("data:{}".format(data))
             # padding
             data = self.padding(data)
             # 将数据发送到计算设备
@@ -172,6 +176,13 @@ class IdiomTrainer:
                                                         positional_enc=positional_enc,
                                                         labels=data["label"]
                                                         )
+            # 计算指标：accuracy
+            pred = torch.argmax(predictions, dim=1)
+            cnt = torch.eq(pred, data["label"]).sum().float().item()
+            num_correct += cnt
+            num_now += len(pred)
+            acc_now = num_correct / num_now
+            """ 计算指标：auc
             # 提取预测的结果和标记, 并存到all_predictions, all_labels里
             # 用来计算auc
             predictions = predictions.detach().cpu().numpy().reshape(-1).tolist()
@@ -182,6 +193,7 @@ class IdiomTrainer:
             fpr, tpr, thresholds = metrics.roc_curve(y_true=all_labels,
                                                      y_score=all_predictions)
             auc = metrics.auc(fpr, tpr)
+            """
 
             # 反向传播
             if train:
@@ -197,23 +209,24 @@ class IdiomTrainer:
 
             if train:
                 log_dic = {
-                    "epoch": epoch,
-                    "train_loss": total_loss/(i+1), "train_auc": auc,
-                    "test_loss": 0, "test_auc": 0
+                    "epoch": epoch + 1,
+                    "train_loss": total_loss/(i+1), "train_acc": acc_now,
+                    "test_loss": 0, "test_acc": 0
                 }
 
             else:
                 log_dic = {
-                    "epoch": epoch,
-                    "train_loss": 0, "train_auc": 0,
-                    "test_loss": total_loss/(i+1), "test_auc": auc
+                    "epoch": epoch + 1,
+                    "train_loss": 0, "train_acc": 0,
+                    "test_loss": total_loss/(i+1), "test_auc": acc_now
                 }
 
             if i % 10 == 0:
                 data_iter.write(str({k: v for k, v in log_dic.items() if v != 0}))
 
-        threshold_ = find_best_threshold(all_predictions, all_labels)
-        print(str_code + " best threshold: " + str(threshold_))
+        # # 寻找最佳阈值
+        # threshold_ = find_best_threshold(all_predictions, all_labels)
+        # print(str_code + " best threshold: " + str(threshold_))
 
         # 将当前epoch的情况记录到DataFrame里
         if train:
@@ -229,7 +242,7 @@ class IdiomTrainer:
                 df.at[epoch, k] = v
             df.to_pickle(df_path)
             # 返回auc, 作为early stop的衡量标准
-            return auc
+            return acc_now
 
     def find_most_recent_state_dict(self, dir_path):
         """
@@ -265,7 +278,7 @@ if __name__ == "__main__":
     train_epoches = 9999
     trainer, dynamic_lr = init_trainer(dynamic_lr=1e-06, batch_size=24)
 
-    all_auc = []
+    all_acc = []
     threshold = 999
     patient = 10
     best_loss = 999999999
@@ -283,11 +296,11 @@ if __name__ == "__main__":
                                 state_dict_dir=trainer.config["state_dict_dir"],
                                 file_path="sentiment.model")
 
-        auc = trainer.test(epoch)
+        acc = trainer.test(epoch)
 
-        all_auc.append(auc)
-        best_auc = max(all_auc)
-        if all_auc[-1] < best_auc:
+        all_acc.append(acc)
+        best_auc = max(all_acc)
+        if all_acc[-1] < best_auc:
             threshold += 1
             dynamic_lr *= 0.8
             trainer.init_optimizer(lr=dynamic_lr)
@@ -296,6 +309,6 @@ if __name__ == "__main__":
             threshold = 0
 
         if threshold >= patient:
-            print("epoch {} has the lowest loss".format(start_epoch + np.argmax(np.array(all_auc))))
+            print("epoch {} has the lowest loss".format(start_epoch + np.argmax(np.array(all_acc))))
             print("early stop!")
             break
