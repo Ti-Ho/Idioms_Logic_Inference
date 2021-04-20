@@ -4,14 +4,14 @@
 # @Author : Tiho
 # @File : IdiomDataset.py
 # @Software: PyCharm
-import configparser
 
+import configparser
 from torch.utils.data import Dataset
 import pandas as pd
-import tqdm
-import json
 import torch
 from sklearn.utils import shuffle
+
+"""语料的加载与tokenize处理"""
 
 
 class IdiomDataset(Dataset):
@@ -71,12 +71,15 @@ class IdiomDataset(Dataset):
         # print(idiom1)
         # print(idiom2)
         sentence1 = explanation1 + example1
-        sentence2= explanation2 + example2
+        sentence2 = explanation2 + example2
         return sentence1, sentence2, label
 
     def tokenize_char(self, segments):
         return [self.word2idx.get(char, self.unk_index) for char in segments]
 
+
+"""
+# 测试
 if __name__ == "__main__":
     config_ = configparser.ConfigParser()
     config_.read("../config/idiom_model_config.ini")
@@ -93,3 +96,4 @@ if __name__ == "__main__":
                                )
     print(train_dataset)
     print(train_dataset[0])
+"""
