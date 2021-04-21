@@ -209,14 +209,14 @@ class IdiomTrainer:
 
             if train:
                 log_dic = {
-                    "epoch": epoch + 1,
+                    "epoch": epoch,
                     "train_loss": total_loss/(i+1), "train_acc": acc_now,
                     "test_loss": 0, "test_acc": 0
                 }
 
             else:
                 log_dic = {
-                    "epoch": epoch + 1,
+                    "epoch": epoch,
                     "train_loss": 0, "train_acc": 0,
                     "test_loss": total_loss/(i+1), "test_auc": acc_now
                 }
@@ -276,7 +276,7 @@ if __name__ == "__main__":
 
     start_epoch = 0
     train_epoches = 9999
-    trainer, dynamic_lr = init_trainer(dynamic_lr=1e-06, batch_size=24)
+    trainer, dynamic_lr = init_trainer(dynamic_lr=1e-04, batch_size=24)
 
     all_acc = []
     threshold = 999
