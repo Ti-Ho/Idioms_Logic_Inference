@@ -17,7 +17,7 @@ import urllib.request
 from bs4 import BeautifulSoup
 import time
 import random
-from subPageCrawl import getSubPageData
+from DataCrawler.subPageCrawl import getSubPageData
 import pandas as pd
 
 findLink = re.compile(r'<a href="/(.*?)"')
