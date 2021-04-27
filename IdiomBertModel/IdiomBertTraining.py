@@ -5,13 +5,10 @@
 # @File : IdiomBertTraining.py
 # @Software: PyCharm
 
-from torch.optim import Adam
 from torch.utils.data import DataLoader
 
 from IdiomBertModel.dataset.IdiomDataset import IdiomDataset
 from IdiomBertModel.models.bert_idiom_model import *
-from sklearn import metrics
-from IdiomBertModel.metrics import *
 
 import tqdm
 import pandas as pd
@@ -47,11 +44,11 @@ class IdiomTrainer:
         self.bert_model = Bert_Idiom_Analysis(config=bertconfig)
         # 将模型发送到计算设备(GPU或CPU)
         self.bert_model.to(self.device)
-        # 声明训练数据集, 按照pytorch的要求定义数据集class
+        # 声明训练数据集
         train_dataset = IdiomDataset(corpus_path=self.config["train_corpus_path"],
-                                   word2idx=self.word2idx,
-                                   max_seq_len=self.max_seq_len
-                                   )
+                                     word2idx=self.word2idx,
+                                     max_seq_len=self.max_seq_len
+                                     )
         self.train_dataloader = DataLoader(train_dataset,
                                            batch_size=self.batch_size,
                                            num_workers=0,
@@ -59,9 +56,9 @@ class IdiomTrainer:
                                            )
         # 声明测试数据集
         test_dataset = IdiomDataset(corpus_path=self.config["test_corpus_path"],
-                                  word2idx=self.word2idx,
-                                  max_seq_len=self.max_seq_len
-                                  )
+                                    word2idx=self.word2idx,
+                                    max_seq_len=self.max_seq_len
+                                    )
         self.test_dataloader = DataLoader(test_dataset,
                                           batch_size=self.batch_size,
                                           num_workers=0,
@@ -75,11 +72,6 @@ class IdiomTrainer:
 
         # 声明需要优化的参数, 并传入Adam优化器
         self.optim_parameters = list(self.bert_model.parameters())
-
-        # all_parameters = list(self.bert_model.named_parameters())
-        # lis_ = ["dense.weight", "dense.bias", "final_dense.weight", "final_dense.bias"]
-        # # self.optim_parameters = [i[1] for i in all_parameters if i[0] in lis_]
-        # self.optim_parameters = list(self.bert_model.parameters())
 
         self.init_optimizer(lr=self.lr)
         if not os.path.exists(self.config["state_dict_dir"]):
@@ -96,7 +88,7 @@ class IdiomTrainer:
 
         position_enc[1:, 0::2] = np.sin(position_enc[1:, 0::2])  # dim 2i
         position_enc[1:, 1::2] = np.cos(position_enc[1:, 1::2])  # dim 2i+1
-        denominator = np.sqrt(np.sum(position_enc**2, axis=1, keepdims=True))
+        denominator = np.sqrt(np.sum(position_enc ** 2, axis=1, keepdims=True))
         # 归一化
         position_enc = position_enc / (denominator + 1e-8)
         position_enc = torch.from_numpy(position_enc).type(torch.FloatTensor)
@@ -153,16 +145,9 @@ class IdiomTrainer:
                               bar_format="{l_bar}{r_bar}")
 
         total_loss = 0
-        """用于计算auc
-        # 存储所有预测的结果和标记, 用来计算auc
-        all_predictions, all_labels = [], []
-        """
-        train_acc = 0
-        num_correct = 0
-        num_now = 0
+        num_correct = 0     # 当前正确数量
+        num_now = 0         # 当前总数量
         for i, data in data_iter:
-            # print("i:{}".format(i))
-            # print("data:{}".format(data))
             # padding
             data = self.padding(data)
             # 将数据发送到计算设备
@@ -182,18 +167,6 @@ class IdiomTrainer:
             num_correct += cnt
             num_now += len(pred)
             acc_now = num_correct / num_now
-            """ 计算指标：auc
-            # 提取预测的结果和标记, 并存到all_predictions, all_labels里
-            # 用来计算auc
-            predictions = predictions.detach().cpu().numpy().reshape(-1).tolist()
-            labels = data["label"].cpu().numpy().reshape(-1).tolist()
-            all_predictions.extend(predictions)
-            all_labels.extend(labels)
-            # 计算auc
-            fpr, tpr, thresholds = metrics.roc_curve(y_true=all_labels,
-                                                     y_score=all_predictions)
-            auc = metrics.auc(fpr, tpr)
-            """
 
             # 反向传播
             if train:
@@ -210,7 +183,7 @@ class IdiomTrainer:
             if train:
                 log_dic = {
                     "epoch": epoch,
-                    "train_loss": total_loss/(i+1), "train_acc": acc_now,
+                    "train_loss": total_loss / (i + 1), "train_acc": acc_now,
                     "test_loss": 0, "test_acc": 0
                 }
 
@@ -218,15 +191,11 @@ class IdiomTrainer:
                 log_dic = {
                     "epoch": epoch,
                     "train_loss": 0, "train_acc": 0,
-                    "test_loss": total_loss/(i+1), "test_auc": acc_now
+                    "test_loss": total_loss / (i + 1), "test_auc": acc_now
                 }
 
             if i % 10 == 0:
                 data_iter.write(str({k: v for k, v in log_dic.items() if v != 0}))
-
-        # # 寻找最佳阈值
-        # threshold_ = find_best_threshold(all_predictions, all_labels)
-        # print(str_code + " best threshold: " + str(threshold_))
 
         # 将当前epoch的情况记录到DataFrame里
         if train:
@@ -266,13 +235,15 @@ class IdiomTrainer:
         print("{} saved!".format(save_path))
         model.to(self.device)
 
+
 if __name__ == "__main__":
     def init_trainer(dynamic_lr, batch_size=24):
         trainer = IdiomTrainer(max_seq_len=300,
                                batch_size=batch_size,
                                lr=dynamic_lr,
-                               with_cuda=True,)
+                               with_cuda=True, )
         return trainer, dynamic_lr
+
 
     start_epoch = 0
     train_epoches = 9999

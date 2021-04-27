@@ -5,7 +5,6 @@
 # @File : IdiomDataset.py
 # @Software: PyCharm
 
-import configparser
 from torch.utils.data import Dataset
 import pandas as pd
 import torch
@@ -40,9 +39,7 @@ class IdiomDataset(Dataset):
 
     def __getitem__(self, item):
         sentence1, sentence2, label = self.get_text_and_label(item)
-        # print(sentence1)
-        # print(sentence2)
-        # print(label)
+
         text_input1 = self.tokenize_char(sentence1)
         text_input2 = self.tokenize_char(sentence2)
 
@@ -69,7 +66,7 @@ class IdiomDataset(Dataset):
             sentence2 = explanation2
         else:
             sentence2 = explanation2 + str(example2)
-        # print(sentence1 + " " + sentence2)
+
         return sentence1, sentence2, label
 
     def tokenize_char(self, segments):
@@ -78,6 +75,8 @@ class IdiomDataset(Dataset):
 
 """
 # 测试
+import configparser
+import json
 if __name__ == "__main__":
     config_ = configparser.ConfigParser()
     config_.read("../config/idiom_model_config.ini")
