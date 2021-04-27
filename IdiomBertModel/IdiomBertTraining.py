@@ -265,7 +265,7 @@ if __name__ == "__main__":
         # 保存当前epoch模型参数
         trainer.save_state_dict(trainer.bert_model, epoch,
                                 state_dict_dir=trainer.config["state_dict_dir"],
-                                file_path="sentiment.model")
+                                file_path="idiom.model")
 
         acc = trainer.test(epoch)
 

@@ -11,7 +11,6 @@ import numpy as np
 import configparser
 import os
 import json
-import warnings
 import re
 
 class IdiomLogicAnalysis:
@@ -95,7 +94,6 @@ class IdiomLogicAnalysis:
         # if len(text_list) < len_:
         #     warnings.warn("输入的文本中有长度为0的句子, 它们将被忽略掉!")
 
-        # max_seq_len=self.max_seq_len+2 因为要留出cls和sep的位置
         max_seq_len = max([len(text[0]) + len(text[1]) for text in text_list])
         # 预处理, 获取batch
         texts_tokens, positional_enc = \
@@ -116,11 +114,12 @@ class IdiomLogicAnalysis:
             predictions = self.bert_model.forward(text_input=texts_tokens_,
                                                   positional_enc=positional_enc,
                                                   )
-            print(predictions)
-            # predictions = np.ravel(predictions.detach().cpu().numpy()).tolist()
 
-            # for text, pred in zip(text_list[start: end], predictions):
-            #     self.sentiment_print_func(text, pred)
+            self.multiClsIdiomInference(predictions)
+
+    # 根据预测结果输出信息
+    def multiClsIdiomInference(self, predictions):
+        print(predictions)
 
     def sentiment_print_func(self, text, pred, threshold):
         print(text)
@@ -173,9 +172,9 @@ if __name__ == '__main__':
         # ["浑浑噩噩", "懒懒散散"], # 1
         # ["好吃懒做", "衣来伸手,饭来张口"], # 1
         # ["白纸黑字","口说无凭"],  # 2
-        # ["恩恩爱爱","清心寡欲"],  # 2
+        ["胸有成竹","十拿九稳"],  # 1
         # ["报仇雪恨","曲意奉迎"],   # 2
-        ["络绎不绝", "比肩接踵"]  # 1
+        # ["络绎不绝", "比肩接踵"]  # 1
     ]
 
     idiomDict = {}
