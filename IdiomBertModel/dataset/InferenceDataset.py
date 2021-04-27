@@ -43,18 +43,15 @@ class InferenceDataset():
         # tokenize a sentence, return a list of tokens sequence
         return [dict.get(i, self.unk_index) for i in text_or_label]
 
-    def add_cls_sep(self, text_tokens):
-        return [self.cls_index] + text_tokens + [self.sep_index]
-
     def __call__(self, text_list, max_seq_len):
+        """
+        预处理
+        :param text_list: 输入格式为[[成语1解释+举例, 成语2解释+举例], [], ..., []]
+        :param max_seq_len:
+        :return: 文本的token, 位置编码
+        """
         text_list_len = [len(text[0]) + len(text[1]) for text in text_list]
         # 判断输入文本长度是否合规, 是否小于等于
-        # if max(text_list_len) > self.max_positions - 3:
-        #     raise AssertionError(
-        #         "max_seq_len exceeds the maximum length of positional encoding! 输入的最大文本长度{}大于最大位置嵌入允许的长度{}!".format(
-        #             max(text_list_len), self.max_positions - 3))
-            # if ignore error, then cut length
-            # max_seq_len = self.max_positions - 2
         if max(text_list_len) > max_seq_len:
             warnings.warn(
                 "maximum length of input texts exceeds \"max_seq_len\"! exceeded length will be cut off! 输入的最大文本长度大于指定最大长度, 多余的部分将会被剪切!")
@@ -64,7 +61,7 @@ class InferenceDataset():
         texts_tokens = [[self.tokenize(text[0], self.word2idx), self.tokenize(text[1], self.word2idx)] for text in text_list]
         # add cls, sep
         texts_tokens = [[self.cls_index] + text[0] + [self.sep_index] + text[1] + [self.sep_index] for text in texts_tokens]
-        print(texts_tokens)
+        # print(texts_tokens)
         # padding
         texts_tokens = [torch.tensor(i) for i in texts_tokens]
         texts_tokens = torch.nn.utils.rnn.pad_sequence(texts_tokens, batch_first=True)
