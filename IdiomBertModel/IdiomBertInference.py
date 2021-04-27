@@ -13,6 +13,7 @@ import os
 import json
 import re
 
+
 class IdiomLogicAnalysis:
     def __init__(self, max_seq_len,
                  batch_size,
@@ -141,27 +142,29 @@ class IdiomLogicAnalysis:
         dic_lis = sorted(dic_lis, key=lambda k: int(k.split(".")[-1]))
         return dir_path + "/" + dic_lis[-1]
 
+
 # 获取两个成语的解释和举例
 def getExplanationAndExample(idiom1, idiom2, idiomDict):
     print(idiom1 + " " + idiom2)
     dic1 = idiomDict.get(idiom1)
     dic2 = idiomDict.get(idiom2)
-    if dic1 == None:               # 在idiomDict中查找 若没有 则跳过
+    if dic1 == None:  # 在idiomDict中查找 若没有 则跳过
         return None, None, 0, 0
     if dic2 == None:
         return 0, 0, None, None
 
     example1 = dic1['example']
     example2 = dic2['example']
-    example1 = re.sub('(～)+', idiom1, example1) # 使用正则表达式 将成语加入到造句中
+    example1 = re.sub('(～)+', idiom1, example1)  # 使用正则表达式 将成语加入到造句中
     example2 = re.sub('(～)+', idiom2, example2)
-    example1 = re.sub('(★.*)+', "", example1)       # 使用正则表达式 去除造句来源
+    example1 = re.sub('(★.*)+', "", example1)  # 使用正则表达式 去除造句来源
     example2 = re.sub('(★.*)+', "", example2)
     example1 = re.sub('(（.*)+', "", example1)
     example2 = re.sub('(（.*)+', "", example2)
     explanation1 = dic1['explanation']
     explanation2 = dic2['explanation']
     return explanation1, example1, explanation2, example2
+
 
 if __name__ == '__main__':
     model = IdiomLogicAnalysis(max_seq_len=300, batch_size=1)
@@ -172,7 +175,7 @@ if __name__ == '__main__':
         # ["浑浑噩噩", "懒懒散散"], # 1
         # ["好吃懒做", "衣来伸手,饭来张口"], # 1
         # ["白纸黑字","口说无凭"],  # 2
-        ["胸有成竹","十拿九稳"],  # 1
+        ["胸有成竹", "十拿九稳"],  # 1
         # ["报仇雪恨","曲意奉迎"],   # 2
         # ["络绎不绝", "比肩接踵"]  # 1
     ]
@@ -200,6 +203,7 @@ if __name__ == '__main__':
             print(idiom_i[1] + "不是成语")
             continue
 
-        textList.append([explanation1 if example1 == "无" else explanation1 + example1, explanation2 if example2 == "无" else explanation2 + example2])
+        textList.append([explanation1 if example1 == "无" else explanation1 + example1,
+                         explanation2 if example2 == "无" else explanation2 + example2])
     # print(textList)
     model(textList)
