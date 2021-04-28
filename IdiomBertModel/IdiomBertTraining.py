@@ -163,7 +163,8 @@ class IdiomTrainer:
             # 正向传播, 得到预测结果和loss
             predictions, loss = self.bert_model.forward(text_input=data["text_input"],
                                                         positional_enc=positional_enc,
-                                                        labels=data["label"]
+                                                        labels=data["label"],
+                                                        ifPool=False
                                                         )
             # 计算指标：accuracy
             pred = torch.argmax(predictions, dim=1)
