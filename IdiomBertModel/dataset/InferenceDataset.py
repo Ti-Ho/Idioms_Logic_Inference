@@ -4,10 +4,17 @@
 # @Author : Tiho
 # @File : InferenceDataset.py
 # @Software: PyCharm
-import warnings
 
+"""
+语料加载与tokenize处理
+用于【多分类】的Bert【模型推断】 IdiomBertInference
+数据(text_list)中的字段:成语1解释+举例, 成语2解释+举例 ('+'表示连接)
+"""
+
+import warnings
 import torch
 import numpy as np
+
 
 class InferenceDataset():
     def __init__(self, hidden_dim, word2idx, max_positions):
@@ -58,9 +65,11 @@ class InferenceDataset():
 
         batch_max_seq_len = max_seq_len + 3
         # tokenize
-        texts_tokens = [[self.tokenize(text[0], self.word2idx), self.tokenize(text[1], self.word2idx)] for text in text_list]
+        texts_tokens = [[self.tokenize(text[0], self.word2idx), self.tokenize(text[1], self.word2idx)] for text in
+                        text_list]
         # add cls, sep
-        texts_tokens = [[self.cls_index] + text[0] + [self.sep_index] + text[1] + [self.sep_index] for text in texts_tokens]
+        texts_tokens = [[self.cls_index] + text[0] + [self.sep_index] + text[1] + [self.sep_index] for text in
+                        texts_tokens]
         # print(texts_tokens)
         # padding
         texts_tokens = [torch.tensor(i) for i in texts_tokens]
@@ -68,6 +77,7 @@ class InferenceDataset():
         positional_enc = \
             torch.from_numpy(self.positional_encoding[:batch_max_seq_len]).type(torch.FloatTensor)
         return texts_tokens, positional_enc
+
 
 """
 # 单元测试

@@ -5,6 +5,12 @@
 # @File : IdiomBertInference.py
 # @Software: PyCharm
 
+"""
+BERT模型推断 多分类
+输入：InputIdiom [[成语1,成语2], ..., [], []]
+输出：多分类各自的概率
+"""
+
 from IdiomBertModel.dataset.InferenceDataset import InferenceDataset
 from IdiomBertModel.models.bert_idiom_model import *
 import numpy as np

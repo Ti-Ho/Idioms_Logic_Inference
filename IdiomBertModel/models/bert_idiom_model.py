@@ -5,6 +5,10 @@
 # @File : bert_idiom_model.py
 # @Software: PyCharm
 
+"""
+多分类成语推断模型：使用#CLS#对应的一条向量进行情感分析
+"""
+
 from IdiomBertModel.models.bert_model import *
 
 
@@ -13,7 +17,6 @@ class Bert_Idiom_Analysis(nn.Module):
         super(Bert_Idiom_Analysis, self).__init__()
         self.bert = BertModel(config)
         self.final_dense = nn.Linear(config.hidden_size, 3)  # 将分为三个类 0/1/2
-        # Todo 不确定dim = 0还是dim = 1
         self.activation = nn.Softmax(dim=1)                  # 使用Softmax激活函数
 
     def compute_loss(self, predictions, labels):

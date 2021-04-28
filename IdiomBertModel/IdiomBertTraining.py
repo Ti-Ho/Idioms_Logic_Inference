@@ -5,6 +5,10 @@
 # @File : IdiomBertTraining.py
 # @Software: PyCharm
 
+"""
+BERT模型训练 多分类
+"""
+
 from torch.utils.data import DataLoader
 
 from IdiomBertModel.dataset.IdiomDataset import IdiomDataset

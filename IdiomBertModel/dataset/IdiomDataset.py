@@ -5,12 +5,17 @@
 # @File : IdiomDataset.py
 # @Software: PyCharm
 
+"""
+语料加载与tokenize处理
+用于【多分类】的Bert【模型训练】 IdiomBertTraining
+数据(self.lines)中的字段: idiom1, idiom2, explanation1, example1, explanation2, example2, label
+                       成语1，成语2，解释1，举例1，解释2，举例2，标签
+"""
+
 from torch.utils.data import Dataset
 import pandas as pd
 import torch
 from sklearn.utils import shuffle
-
-"""语料的加载与tokenize处理"""
 
 
 class IdiomDataset(Dataset):
