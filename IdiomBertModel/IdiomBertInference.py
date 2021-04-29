@@ -120,6 +120,8 @@ class IdiomLogicAnalysis:
 
             predictions = self.bert_model.forward(text_input=texts_tokens_,
                                                   positional_enc=positional_enc,
+                                                  # Todo test it
+                                                  ifPool=True
                                                   )
 
             self.multiClsIdiomInference(predictions)
@@ -181,13 +183,13 @@ if __name__ == '__main__':
         # ["浑浑噩噩", "懒懒散散"], # 1
         # ["好吃懒做", "衣来伸手,饭来张口"], # 1
         # ["白纸黑字","口说无凭"],  # 2
-        ["胸有成竹", "十拿九稳"],  # 1
-        # ["报仇雪恨","曲意奉迎"],   # 2
+        # ["胸有成竹", "十拿九稳"],  # 1
+        ["报仇雪恨","曲意奉迎"],   # 2
         # ["络绎不绝", "比肩接踵"]  # 1
     ]
 
     idiomDict = {}
-    # 读取idiom.json中的数据 重构
+    # 读取idiom.json中的数据 重构f
     with open('corpus/idiom.json', 'r', encoding="utf-8") as f:
         lists = f.readlines()[0]
         preData = json.loads(lists)
