@@ -7,7 +7,7 @@
 
 """
 语料加载与tokenize处理
-用于【多分类】的Bert【模型训练】 IdiomBertTraining
+用于【多分类】以及【二分类】的Bert【模型训练】 IdiomBertTraining
 数据(self.lines)中的字段: idiom1, idiom2, explanation1, example1, explanation2, example2, label
                        成语1，成语2，解释1，举例1，解释2，举例2，标签
 """
@@ -19,7 +19,15 @@ from sklearn.utils import shuffle
 
 
 class IdiomDataset(Dataset):
-    def __init__(self, corpus_path, word2idx, max_seq_len):
+    def __init__(self, corpus_path, word2idx, max_seq_len, cls_type=0):
+        """
+        :param corpus_path: 语料的路径
+        :param word2idx:    word2idx
+        :param max_seq_len: 句子最长的长度
+        :param cls_type:    若cls_type=0 表示多分类 label = 0 无逻辑关系, 1 并列关系, 2 转折关系
+                            若cls_type=1 表示二分类 label = 0 非并列关系, 1 并列关系
+                            若cls_type=2 表示二分类 label = 0 非转折关系, 1 转折关系
+        """
         self.word2idx = word2idx
         # define max length
         self.max_seq_len = max_seq_len
@@ -32,6 +40,7 @@ class IdiomDataset(Dataset):
         self.sep_index = 3
         self.mask_index = 4
         self.num_index = 5
+        self.cls_type = cls_type
 
         # 加载语料
         file = pd.read_csv(self.corpus_path)
@@ -44,7 +53,11 @@ class IdiomDataset(Dataset):
 
     def __getitem__(self, item):
         sentence1, sentence2, label = self.get_text_and_label(item)
-
+        # 判断需要的是二分类还是多分类数据, 处理数据
+        if self.cls_type == 1:
+            label = 1 if label == 1 else 0
+        if self.cls_type == 2:
+            label = 1 if label == 2 else 0
         text_input1 = self.tokenize_char(sentence1)
         text_input2 = self.tokenize_char(sentence2)
 
@@ -82,6 +95,7 @@ class IdiomDataset(Dataset):
 # 测试
 import configparser
 import json
+
 if __name__ == "__main__":
     config_ = configparser.ConfigParser()
     config_.read("../config/idiom_model_config.ini")
@@ -93,9 +107,11 @@ if __name__ == "__main__":
         word2idx = json.load(f)
     # 声明训练数据集, 按照pytorch的要求定义数据集class
     train_dataset = IdiomDataset(corpus_path="../corpus/IdiomData_train.csv",
-                               word2idx=word2idx,
-                               max_seq_len=300,
-                               )
+                                 word2idx=word2idx,
+                                 max_seq_len=300,
+                                 cls_type=2
+                                 )
     print(train_dataset)
-    print(train_dataset[0])
+    for i in range(25):
+        print(train_dataset[i])
 """

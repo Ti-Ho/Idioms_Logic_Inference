@@ -6,7 +6,7 @@
 # @Software: PyCharm
 
 """
-多分类成语推断模型：使用#CLS#对应的一条向量进行推断
+多分类成语推断模型
 """
 
 from IdiomBertModel.models.bert_model import *
@@ -27,6 +27,14 @@ class Bert_Idiom_Analysis(nn.Module):
         return loss
 
     def forward(self, text_input, positional_enc, labels=None, ifPool=True):
+        """
+        :param text_input: 文本输入
+        :param positional_enc: 位置编码
+        :param labels: 标签
+        :param ifPool:  ifPool = True 使用Mean Max Pool
+                        ifPool = False 截取#CLS#标签所对应的向量
+        :return: 预测predictions 损失loss
+        """
         encoded_layers, _ = self.bert(text_input, positional_enc, output_all_encoded_layers=True)
         sequence_output = encoded_layers[2]
         # predictions_ = []
@@ -46,7 +54,7 @@ class Bert_Idiom_Analysis(nn.Module):
             predictions_ = self.final_dense(first_token_tensor)
 
 
-        
+
         # print("shape = {}".format(predictions_.shape))  输出：shape = torch.Size([24, 3])
         # 用softmax函数做激活
         predictions = self.activation(predictions_)
