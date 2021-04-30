@@ -61,6 +61,7 @@ class Bert_Idiom_Analysis_v2(nn.Module):
             # 在这里要解决的是二分类问题
             predictions = self.final_dense(first_token_tensor)
 
+        predictions = self.activation(predictions)
         if labels is not None:
             # 计算loss
             loss = self.compute_loss(predictions, labels)

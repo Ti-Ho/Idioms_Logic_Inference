@@ -275,8 +275,8 @@ if __name__ == "__main__":
         acc = trainer.test(epoch)
 
         all_acc.append(acc)
-        best_auc = max(all_acc)
-        if all_acc[-1] < best_auc:
+        best_acc = max(all_acc)
+        if all_acc[-1] < best_acc:
             threshold += 1
             dynamic_lr *= 0.8
             trainer.init_optimizer(lr=dynamic_lr)

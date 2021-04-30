@@ -5,21 +5,14 @@
 # @File : IdiomBinaryBertTraining.py
 # @Software: PyCharm
 
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Time : 2021/4/20 19:17
-# @Author : Tiho
-# @File : IdiomBertTraining.py
-# @Software: PyCharm
-
 """
-BERT模型训练 多分类
+BERT模型训练 二分类
 """
-
+from sklearn import metrics
 from torch.utils.data import DataLoader
 
 from IdiomBertModel.dataset.IdiomDataset import IdiomDataset
-from IdiomBertModel.models.bert_idiom_model import *
+from IdiomBertModel.models.bert_idiom_binary_model import *
 
 import tqdm
 import pandas as pd
@@ -34,6 +27,7 @@ class IdiomTrainer:
                  batch_size,
                  lr,  # 学习率
                  with_cuda=True,  # 是否使用GPU, 如未找到GPU, 则自动切换CPU
+                 cls_type=1
                  ):
         config_ = configparser.ConfigParser()
         config_.read("./config/idiom_model_config.ini")
@@ -41,6 +35,7 @@ class IdiomTrainer:
         self.vocab_size = int(self.config["vocab_size"])
         self.batch_size = batch_size
         self.lr = lr
+        self.cls_type = cls_type
         # 加载字典
         with open(self.config["word2idx_path"], "r", encoding="utf-8") as f:
             self.word2idx = json.load(f)
@@ -52,13 +47,14 @@ class IdiomTrainer:
         # 定义模型超参数
         bertconfig = BertConfig(vocab_size=self.vocab_size)
         # 初始化BERT成语逻辑分析模型
-        self.bert_model = Bert_Idiom_Analysis(config=bertconfig)
+        self.bert_model = Bert_Idiom_Analysis_v2(config=bertconfig)
         # 将模型发送到计算设备(GPU或CPU)
         self.bert_model.to(self.device)
         # 声明训练数据集
         train_dataset = IdiomDataset(corpus_path=self.config["train_corpus_path"],
                                      word2idx=self.word2idx,
-                                     max_seq_len=self.max_seq_len
+                                     max_seq_len=self.max_seq_len,
+                                     cls_type=self.cls_type                                     # cls_type = 1 表示训练并列关系二分类模型 2表示训练转折关系二分类模型
                                      )
         self.train_dataloader = DataLoader(train_dataset,
                                            batch_size=self.batch_size,
@@ -68,7 +64,8 @@ class IdiomTrainer:
         # 声明测试数据集
         test_dataset = IdiomDataset(corpus_path=self.config["test_corpus_path"],
                                     word2idx=self.word2idx,
-                                    max_seq_len=self.max_seq_len
+                                    max_seq_len=self.max_seq_len,
+                                    cls_type=self.cls_type
                                     )
         self.test_dataloader = DataLoader(test_dataset,
                                           batch_size=self.batch_size,
@@ -156,8 +153,9 @@ class IdiomTrainer:
                               bar_format="{l_bar}{r_bar}")
 
         total_loss = 0
-        num_correct = 0     # 当前正确数量
-        num_now = 0         # 当前总数量
+        # 存储所有预测的结果和标记, 用来计算auc
+        all_predictions, all_labels = [], []
+
         for i, data in data_iter:
             # padding
             data = self.padding(data)
@@ -173,12 +171,16 @@ class IdiomTrainer:
                                                         labels=data["label"],
                                                         ifPool=True
                                                         )
-            # 计算指标：accuracy
-            pred = torch.argmax(predictions, dim=1)
-            cnt = torch.eq(pred, data["label"]).sum().float().item()
-            num_correct += cnt
-            num_now += len(pred)
-            acc_now = num_correct / num_now
+            # 提取预测的结果和标记, 并存到all_predictions, all_labels里
+            # 用来计算auc
+            predictions = predictions.detach().cpu().numpy().reshape(-1).tolist()
+            labels = data["label"].cpu().numpy().reshape(-1).tolist()
+            all_predictions.extend(predictions)
+            all_labels.extend(labels)
+            # 计算auc
+            fpr, tpr, thresholds = metrics.roc_curve(y_true=all_labels,
+                                                     y_score=all_predictions)
+            auc = metrics.auc(fpr, tpr)
 
             # 反向传播
             if train:
@@ -195,15 +197,15 @@ class IdiomTrainer:
             if train:
                 log_dic = {
                     "epoch": epoch,
-                    "train_loss": total_loss / (i + 1), "train_acc": acc_now,
-                    "test_loss": 0, "test_acc": 0
+                    "train_loss": total_loss / (i + 1), "train_auc": auc,
+                    "test_loss": 0, "test_auc": 0
                 }
 
             else:
                 log_dic = {
                     "epoch": epoch,
-                    "train_loss": 0, "train_acc": 0,
-                    "test_loss": total_loss / (i + 1), "test_auc": acc_now
+                    "train_loss": 0, "train_auc": 0,
+                    "test_loss": total_loss / (i + 1), "test_auc": auc
                 }
 
             if i % 10 == 0:
@@ -223,7 +225,7 @@ class IdiomTrainer:
                 df.at[epoch, k] = v
             df.to_pickle(df_path)
             # 返回auc, 作为early stop的衡量标准
-            return acc_now
+            return auc
 
     def find_most_recent_state_dict(self, dir_path):
         """
@@ -253,7 +255,8 @@ if __name__ == "__main__":
         trainer = IdiomTrainer(max_seq_len=300,
                                batch_size=batch_size,
                                lr=dynamic_lr,
-                               with_cuda=True, )
+                               with_cuda=True,
+                               cls_type=1)
         return trainer, dynamic_lr
 
 
@@ -261,7 +264,7 @@ if __name__ == "__main__":
     train_epoches = 9999
     trainer, dynamic_lr = init_trainer(dynamic_lr=1e-04, batch_size=24)
 
-    all_acc = []
+    all_auc = []
     threshold = 999
     patient = 10
     best_loss = 999999999
@@ -279,11 +282,10 @@ if __name__ == "__main__":
                                 state_dict_dir=trainer.config["state_dict_dir"],
                                 file_path="idiom.model")
 
-        acc = trainer.test(epoch)
-
-        all_acc.append(acc)
-        best_auc = max(all_acc)
-        if all_acc[-1] < best_auc:
+        auc = trainer.test(epoch)
+        all_auc.append(auc)
+        best_auc = max(all_auc)
+        if all_auc[-1] < best_auc:
             threshold += 1
             dynamic_lr *= 0.8
             trainer.init_optimizer(lr=dynamic_lr)
@@ -292,6 +294,6 @@ if __name__ == "__main__":
             threshold = 0
 
         if threshold >= patient:
-            print("epoch {} has the lowest loss".format(start_epoch + np.argmax(np.array(all_acc))))
+            print("epoch {} has the lowest loss".format(start_epoch + np.argmax(np.array(all_auc))))
             print("early stop!")
             break
