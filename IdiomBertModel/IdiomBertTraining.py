@@ -169,6 +169,9 @@ class IdiomTrainer:
             # 计算指标：accuracy
             pred = torch.argmax(predictions, dim=1)
             cnt = torch.eq(pred, data["label"]).sum().float().item()
+            # print("epoch:{}".format(epoch))
+            # print(predictions)
+            # print(data["label"])
             num_correct += cnt
             num_now += len(pred)
             acc_now = num_correct / num_now
