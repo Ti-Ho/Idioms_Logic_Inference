@@ -135,8 +135,8 @@ class IdiomTrainer:
         # 初始化一个pandas DataFrame进行训练日志的存储
         df_path = self.config["state_dict_dir"] + "/" + df_name
         if not os.path.isfile(df_path):
-            df = pd.DataFrame(columns=["epoch", "train_loss", "train_auc",
-                                       "test_loss", "test_auc"
+            df = pd.DataFrame(columns=["epoch", "train_loss", "train_acc",
+                                       "test_loss", "test_acc"
                                        ])
             df.to_pickle(df_path)
             print("log DataFrame created!")
