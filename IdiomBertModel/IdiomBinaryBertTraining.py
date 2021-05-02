@@ -174,7 +174,9 @@ class IdiomTrainer:
             # 提取预测的结果和标记, 并存到all_predictions, all_labels里
             # 用来计算auc
             predictions = predictions.detach().cpu().numpy().reshape(-1).tolist()
+            # print(predictions)
             labels = data["label"].cpu().numpy().reshape(-1).tolist()
+            # print(labels)
             all_predictions.extend(predictions)
             all_labels.extend(labels)
             # 计算auc
