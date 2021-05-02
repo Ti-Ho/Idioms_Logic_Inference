@@ -27,6 +27,7 @@ class IdiomTrainer:
                  batch_size,
                  lr,  # 学习率
                  with_cuda=True,  # 是否使用GPU, 如未找到GPU, 则自动切换CPU
+                 ifPool=True
                  ):
         config_ = configparser.ConfigParser()
         config_.read("./config/idiom_model_config.ini")
@@ -34,6 +35,7 @@ class IdiomTrainer:
         self.vocab_size = int(self.config["vocab_size"])
         self.batch_size = batch_size
         self.lr = lr
+        self.ifPool=ifPool
         # 加载字典
         with open(self.config["word2idx_path"], "r", encoding="utf-8") as f:
             self.word2idx = json.load(f)
@@ -164,7 +166,7 @@ class IdiomTrainer:
             predictions, loss = self.bert_model.forward(text_input=data["text_input"],
                                                         positional_enc=positional_enc,
                                                         labels=data["label"],
-                                                        ifPool=True
+                                                        ifPool=self.ifPool
                                                         )
             # 计算指标：accuracy
             pred = torch.argmax(predictions, dim=1)
@@ -249,7 +251,8 @@ if __name__ == "__main__":
         trainer = IdiomTrainer(max_seq_len=300,
                                batch_size=batch_size,
                                lr=dynamic_lr,
-                               with_cuda=True, )
+                               with_cuda=True,
+                               ifPool=True)
         return trainer, dynamic_lr
 
 

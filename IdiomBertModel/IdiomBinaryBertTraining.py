@@ -27,7 +27,8 @@ class IdiomTrainer:
                  batch_size,
                  lr,  # 学习率
                  with_cuda=True,  # 是否使用GPU, 如未找到GPU, 则自动切换CPU
-                 cls_type=1
+                 cls_type=1,
+                 ifPool=True
                  ):
         config_ = configparser.ConfigParser()
         config_.read("./config/idiom_model_config.ini")
@@ -36,6 +37,7 @@ class IdiomTrainer:
         self.batch_size = batch_size
         self.lr = lr
         self.cls_type = cls_type
+        self.ifPool = ifPool
         # 加载字典
         with open(self.config["word2idx_path"], "r", encoding="utf-8") as f:
             self.word2idx = json.load(f)
@@ -169,7 +171,7 @@ class IdiomTrainer:
             predictions, loss = self.bert_model.forward(text_input=data["text_input"],
                                                         positional_enc=positional_enc,
                                                         labels=data["label"],
-                                                        ifPool=True
+                                                        ifPool=self.ifPool
                                                         )
             # 提取预测的结果和标记, 并存到all_predictions, all_labels里
             # 用来计算auc
@@ -258,7 +260,8 @@ if __name__ == "__main__":
                                batch_size=batch_size,
                                lr=dynamic_lr,
                                with_cuda=True,
-                               cls_type=1)
+                               cls_type=1,
+                               ifPool=True)
         return trainer, dynamic_lr
 
 
