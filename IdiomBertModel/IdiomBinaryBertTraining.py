@@ -84,8 +84,8 @@ class IdiomTrainer:
         self.optim_parameters = list(self.bert_model.parameters())
 
         self.init_optimizer(lr=self.lr)
-        if not os.path.exists(self.config["state_dict_dir"]):
-            os.mkdir(self.config["state_dict_dir"])
+        if not os.path.exists(self.config["bi_pool_state_dict_dir" if self.ifPool else "bi_cls_state_dict_dir"]):
+            os.mkdir(self.config["bi_pool_state_dict_dir" if self.ifPool else "bi_cls_state_dict_dir"])
 
     def init_optimizer(self, lr):
         # 用指定的学习率初始化优化器
@@ -139,7 +139,7 @@ class IdiomTrainer:
 
     def iteration(self, epoch, data_loader, train=True, df_name="df_log.pickle"):
         # 初始化一个pandas DataFrame进行训练日志的存储
-        df_path = self.config["state_dict_dir"] + "/" + df_name
+        df_path = self.config["bi_pool_state_dict_dir" if self.ifPool else "bi_cls_state_dict_dir"] + "/" + df_name
         if not os.path.isfile(df_path):
             df = pd.DataFrame(columns=["epoch", "train_loss", "train_auc",
                                        "test_loss", "test_auc"
@@ -256,12 +256,12 @@ class IdiomTrainer:
 
 if __name__ == "__main__":
     def init_trainer(dynamic_lr, batch_size=24):
-        # 训练【多分类】使用【Mean max pool】判断
-        trainer = IdiomTrainer(max_seq_len=300, batch_size=batch_size, lr=dynamic_lr, with_cuda=True, cls_type=1,
-                               ifPool=True)
-        # 训练【多分类】使用【CLS】向量判断
+        # 训练【二分类】使用【Mean max pool】判断
         # trainer = IdiomTrainer(max_seq_len=300, batch_size=batch_size, lr=dynamic_lr, with_cuda=True, cls_type=1,
-        #                        ifPool=False)
+        #                        ifPool=True)
+        # 训练【二分类】使用【CLS】向量判断
+        trainer = IdiomTrainer(max_seq_len=300, batch_size=batch_size, lr=dynamic_lr, with_cuda=True, cls_type=1,
+                               ifPool=False)
         return trainer, dynamic_lr
 
 
@@ -278,13 +278,13 @@ if __name__ == "__main__":
             # 第一个epoch的训练需要加载预训练的BERT模型
             trainer.load_model(trainer.bert_model, dir_path="./bert_state_dict", load_bert=True)
         elif epoch == start_epoch:
-            trainer.load_model(trainer.bert_model, dir_path=trainer.config["state_dict_dir"])
+            trainer.load_model(trainer.bert_model, dir_path=trainer.config["bi_pool_state_dict_dir" if trainer.ifPool else "bi_cls_state_dict_dir"])
         print("train with learning rate {}".format(str(dynamic_lr)))
         # 训练一个epoch
         trainer.train(epoch)
         # 保存当前epoch模型参数
         trainer.save_state_dict(trainer.bert_model, epoch,
-                                state_dict_dir=trainer.config["state_dict_dir"],
+                                state_dict_dir=trainer.config["bi_pool_state_dict_dir" if trainer.ifPool else "bi_cls_state_dict_dir"],
                                 file_path="idiom.model")
 
         auc = trainer.test(epoch)

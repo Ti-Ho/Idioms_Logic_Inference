@@ -35,7 +35,7 @@ class IdiomTrainer:
         self.vocab_size = int(self.config["vocab_size"])
         self.batch_size = batch_size
         self.lr = lr
-        self.ifPool=ifPool
+        self.ifPool = ifPool
         # 加载字典
         with open(self.config["word2idx_path"], "r", encoding="utf-8") as f:
             self.word2idx = json.load(f)
@@ -80,8 +80,8 @@ class IdiomTrainer:
         self.optim_parameters = list(self.bert_model.parameters())
 
         self.init_optimizer(lr=self.lr)
-        if not os.path.exists(self.config["state_dict_dir"]):
-            os.mkdir(self.config["state_dict_dir"])
+        if not os.path.exists(self.config["multi_pool_state_dict_dir" if self.ifPool else "multi_cls_state_dict_dir"]):
+            os.mkdir(self.config["multi_pool_state_dict_dir" if self.ifPool else "multi_cls_state_dict_dir"])
 
     def init_optimizer(self, lr):
         # 用指定的学习率初始化优化器
@@ -135,7 +135,7 @@ class IdiomTrainer:
 
     def iteration(self, epoch, data_loader, train=True, df_name="df_log.pickle"):
         # 初始化一个pandas DataFrame进行训练日志的存储
-        df_path = self.config["state_dict_dir"] + "/" + df_name
+        df_path = self.config["multi_pool_state_dict_dir" if self.ifPool else "multi_cls_state_dict_dir"] + "/" + df_name
         if not os.path.isfile(df_path):
             df = pd.DataFrame(columns=["epoch", "train_loss", "train_acc",
                                        "test_loss", "test_acc"
@@ -171,9 +171,6 @@ class IdiomTrainer:
             # 计算指标：accuracy
             pred = torch.argmax(predictions, dim=1)
             cnt = torch.eq(pred, data["label"]).sum().float().item()
-            # print("epoch:{}".format(epoch))
-            # print(predictions)
-            # print(data["label"])
             num_correct += cnt
             num_now += len(pred)
             acc_now = num_correct / num_now
@@ -249,9 +246,9 @@ class IdiomTrainer:
 if __name__ == "__main__":
     def init_trainer(dynamic_lr, batch_size=24):
         # 训练【多分类】使用【Mean max pool】判断
-        trainer = IdiomTrainer(max_seq_len=300, batch_size=batch_size, lr=dynamic_lr, with_cuda=True, ifPool=True)
+        # trainer = IdiomTrainer(max_seq_len=300, batch_size=batch_size, lr=dynamic_lr, with_cuda=True, ifPool=True)
         # 训练【多分类】使用【CLS】向量判断
-        # trainer = IdiomTrainer(max_seq_len=300, batch_size=batch_size, lr=dynamic_lr, with_cuda=True, ifPool=False)
+        trainer = IdiomTrainer(max_seq_len=300, batch_size=batch_size, lr=dynamic_lr, with_cuda=True, ifPool=False)
         return trainer, dynamic_lr
 
     start_epoch = 0
@@ -267,13 +264,13 @@ if __name__ == "__main__":
             # 第一个epoch的训练需要加载预训练的BERT模型
             trainer.load_model(trainer.bert_model, dir_path="./bert_state_dict", load_bert=True)
         elif epoch == start_epoch:
-            trainer.load_model(trainer.bert_model, dir_path=trainer.config["state_dict_dir"])
+            trainer.load_model(trainer.bert_model, dir_path=trainer.config["multi_pool_state_dict_dir" if trainer.ifPool else "multi_cls_state_dict_dir"])
         print("train with learning rate {}".format(str(dynamic_lr)))
         # 训练一个epoch
         trainer.train(epoch)
         # 保存当前epoch模型参数
         trainer.save_state_dict(trainer.bert_model, epoch,
-                                state_dict_dir=trainer.config["state_dict_dir"],
+                                state_dict_dir=trainer.config["multi_pool_state_dict_dir" if trainer.ifPool else "multi_cls_state_dict_dir"],
                                 file_path="idiom.model")
 
         acc = trainer.test(epoch)
