@@ -248,13 +248,11 @@ class IdiomTrainer:
 
 if __name__ == "__main__":
     def init_trainer(dynamic_lr, batch_size=24):
-        trainer = IdiomTrainer(max_seq_len=300,
-                               batch_size=batch_size,
-                               lr=dynamic_lr,
-                               with_cuda=True,
-                               ifPool=True)
+        # 训练【多分类】使用【Mean max pool】判断
+        trainer = IdiomTrainer(max_seq_len=300, batch_size=batch_size, lr=dynamic_lr, with_cuda=True, ifPool=True)
+        # 训练【多分类】使用【CLS】向量判断
+        # trainer = IdiomTrainer(max_seq_len=300, batch_size=batch_size, lr=dynamic_lr, with_cuda=True, ifPool=False)
         return trainer, dynamic_lr
-
 
     start_epoch = 0
     train_epoches = 9999
