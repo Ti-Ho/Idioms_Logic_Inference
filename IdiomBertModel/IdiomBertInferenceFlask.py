@@ -112,13 +112,13 @@ class IdiomLogicAnalysis:
         print("{} loaded!".format(checkpoint_dir))
 
     # 模型推断
-    def __call__(self, idiom1msg, idiom2msg, batch_size=1):
+    def __call__(self, idiom1msg, idiom2msg, model_type, ifPool):
         """
-        :param text_list:
-        :param batch_size: 为了注意力矩阵的可视化, batch_size只能为1, 即单句
+        :param idiom1msg:
+        :param idiom2msg:
+        :param batch_size:
         :return:
         """
-        print([[idiom1msg, idiom2msg]])
         max_seq_len = len(idiom1msg) + len(idiom2msg)
         # 预处理, 获取batch
         texts_tokens, positional_enc = \
@@ -128,11 +128,28 @@ class IdiomLogicAnalysis:
 
         # 数据按mini batch切片过正向, 这里为了可视化所以吧batch size设为1
         texts_tokens = texts_tokens.to(self.device)
-
-        predictions = self.bipool_bert_model2.forward(text_input=texts_tokens,
-                                                      positional_enc=positional_enc,
-                                                      ifPool=True)
-        print(predictions)
+        if model_type == 0:  # 多分类
+            if ifPool:  # mean max pool
+                predictions = self.pool_bert_model.forward(text_input=texts_tokens, positional_enc=positional_enc,
+                                                           ifPool=ifPool)
+            else:  # cls
+                predictions = self.cls_bert_model.forward(text_input=texts_tokens, positional_enc=positional_enc,
+                                                          ifPool=ifPool)
+            return predictions.detach().cpu().numpy().reshape(-1).tolist()
+        else:  # 二分类
+            if ifPool:  # mean max pool
+                p1 = self.bipool_bert_model.forward(text_input=texts_tokens, positional_enc=positional_enc,
+                                                    ifPool=ifPool)
+                p2 = self.bipool_bert_model2.forward(text_input=texts_tokens, positional_enc=positional_enc,
+                                                     ifPool=ifPool)
+                predictions = [p1.detach().cpu().reshape(-1).tolist()[0], p2.detach().cpu().reshape(-1).tolist()[0]]
+            else:  # cls
+                p1 = self.bicls_bert_model.forward(text_input=texts_tokens, positional_enc=positional_enc,
+                                                   ifPool=ifPool)
+                p2 = self.bicls_bert_model2.forward(text_input=texts_tokens, positional_enc=positional_enc,
+                                                    ifPool=ifPool)
+                predictions = [p1.detach().cpu().reshape(-1).tolist()[0], p2.detach().cpu().reshape(-1).tolist()[0]]
+            return predictions
 
     # 寻找模型加载文件
     def find_most_recent_state_dict(self, dir_path):
@@ -171,25 +188,23 @@ def getExplanationAndExample(idiom1, idiom2, idiomDict):
     return explanation1, example1, explanation2, example2
 
 
-"""
-后端接口:POST请求
-POST请求数据:idiom1: 成语1
-            idiom2: 成语2
-            model_type: 0->多分类模型 1->二分类模型
-            ifPool: True使用mean max pool;False使用CLS向量
-返回数据: 二分类: p1是并列关系的概率, p2是转折关系的概率
-         多分类: p0无逻辑关系的概率, p1是并列关系的概率, p2是转折关系的概率
-"""
-
-
 @app.route("/get_res", methods=["POST"])
 def idiom_api():
+    """
+    后端接口:POST请求
+    POST请求数据:idiom1: 成语1
+                idiom2: 成语2
+                model_type: 0->多分类模型 1->二分类模型
+                ifPool: True使用mean max pool;False使用CLS向量
+    返回数据: 二分类: p1是并列关系的概率, p2是转折关系的概率
+             多分类: p0无逻辑关系的概率, p1是并列关系的概率, p2是转折关系的概率
+    """
     if request.method == "POST":
         idiom1 = request.form["idiom1"]
         idiom2 = request.form["idiom2"]
-        model_type = request.form["model_type"]
-        ifPool = request.form["ifPool"]
-        # print("{} {} {} {}".format(idiom1, idiom2, model_type, ifPool))
+        model_type = int(request.form["model_type"])
+        ifPool = int(request.form["ifPool"])
+        print("{} {} {} {}".format(idiom1, idiom2, model_type, ifPool))
         # 获取两个成语的解释与造句
         explanation1, example1, explanation2, example2 = getExplanationAndExample(idiom1, idiom2, idiomDict)
         if explanation1 is None:
@@ -199,16 +214,14 @@ def idiom_api():
             print(idiom2 + "不是成语")
             return jsonify({"status": 2})
 
-        model(explanation1 if example1 == "无" else explanation1 + example1,
-              explanation2 if example2 == "无" else explanation2 + example2,
-              batch_size=1)
-        # print(predictions)
-        # model(textList, batch_size=1)
+        predictions = model(explanation1 if example1 == "无" else explanation1 + example1,
+                            explanation2 if example2 == "无" else explanation2 + example2,
+                            model_type=model_type,
+                            ifPool=ifPool)
 
         return jsonify({
             "status": 0,
-            "p1": 0.92,
-            "p2": 0.02,
+            "predictions": predictions,
         })
 
 
@@ -229,4 +242,5 @@ if __name__ == "__main__":
             idiomDict[word]["explanation"] = data["explanation"]
             idiomDict[word]["example"] = data["example"]
     print("######加载完毕######")
+
     app.run()
