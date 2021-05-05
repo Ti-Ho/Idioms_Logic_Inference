@@ -1,35 +1,35 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time : 2021/4/24 9:40
+# @Time : 2021/5/5 14:38
 # @Author : Tiho
-# @File : IdiomBertInference.py
+# @File : IdiomBertInferenceFlask.py
 # @Software: PyCharm
 
-"""
-BERT模型推断 多分类
-输入：InputIdiom [[成语1,成语2], ..., [], []]
-输出：多分类各自的概率
-"""
-
+# 解决跨域
+from flask_cors import CORS
+from flask import Flask, request, jsonify
 from IdiomBertModel.dataset.InferenceDataset import InferenceDataset
 from IdiomBertModel.models.bert_idiom_model import *
+from IdiomBertModel.models.bert_idiom_binary_model import *
 import numpy as np
 import configparser
 import os
 import json
 import re
 
+app = Flask(__name__)
+CORS(app, supports_credentials=True)
 
+
+# 成语推断类
 class IdiomLogicAnalysis:
     def __init__(self, max_seq_len,
-                 batch_size,
                  with_cuda=True,  # 是否使用GPU, 如未找到GPU, 则自动切换CPU
                  ):
         config_ = configparser.ConfigParser()
         config_.read("./config/idiom_model_config.ini")
         self.config = config_["DEFAULT"]
         self.vocab_size = int(self.config["vocab_size"])
-        self.batch_size = batch_size
         # 加载字典
         with open(self.config["word2idx_path"], "r", encoding="utf-8") as f:
             self.word2idx = json.load(f)
@@ -40,12 +40,34 @@ class IdiomLogicAnalysis:
         self.max_seq_len = max_seq_len
         # 定义模型超参数
         bertconfig = BertConfig(vocab_size=self.vocab_size)
+        # 初始化模型
+        # 1.【多分类】【CLS】
         # 初始化BERT情感分析模型
-        self.bert_model = Bert_Idiom_Analysis(config=bertconfig)
+        self.cls_bert_model = Bert_Idiom_Analysis(config=bertconfig)
         # 将模型发送到计算设备(GPU或CPU)
-        self.bert_model.to(self.device)
+        self.cls_bert_model.to(self.device)
         # 开去evaluation模型, 关闭模型内部的dropout层
-        self.bert_model.eval()
+        self.cls_bert_model.eval()
+        # 2.【多分类】【mean max pool】
+        self.pool_bert_model = Bert_Idiom_Analysis(config=bertconfig)
+        self.pool_bert_model.to(self.device)
+        self.pool_bert_model.eval()
+        # 3. 【二分类】【CLS】【并列关系判断】
+        self.bicls_bert_model = Bert_Idiom_Analysis_v2(config=bertconfig)
+        self.bicls_bert_model.to(self.device)
+        self.bicls_bert_model.eval()
+        # 4. 【二分类】【mean max pool】【并列关系判断】
+        self.bipool_bert_model = Bert_Idiom_Analysis_v2(config=bertconfig)
+        self.bipool_bert_model.to(self.device)
+        self.bipool_bert_model.eval()
+        # 5. 【二分类】【CLS】【转折关系判断】
+        self.bicls_bert_model2 = Bert_Idiom_Analysis_v2(config=bertconfig)
+        self.bicls_bert_model2.to(self.device)
+        self.bicls_bert_model2.eval()
+        # 6. 【二分类】【mean max pool】【转折关系判断】
+        self.bipool_bert_model2 = Bert_Idiom_Analysis_v2(config=bertconfig)
+        self.bipool_bert_model2.to(self.device)
+        self.bipool_bert_model2.eval()
 
         # 初始化位置编码
         self.hidden_dim = bertconfig.hidden_size
@@ -59,7 +81,12 @@ class IdiomLogicAnalysis:
                                               max_positions=max_seq_len,
                                               word2idx=self.word2idx)
         # 加载BERT预训练模型
-        self.load_model(self.bert_model, dir_path=self.config["state_dict_dir"])
+        self.load_model(self.cls_bert_model, dir_path=self.config["multi_cls_state_dict_dir"])
+        self.load_model(self.pool_bert_model, dir_path=self.config["multi_pool_state_dict_dir"])
+        self.load_model(self.bicls_bert_model, dir_path=self.config["bi_cls_state_dict_dir"])
+        self.load_model(self.bipool_bert_model, dir_path=self.config["bi_pool_state_dict_dir"])
+        self.load_model(self.bicls_bert_model2, dir_path=self.config["bi_cls_state_dict_dir2"])
+        self.load_model(self.bipool_bert_model2, dir_path=self.config["bi_pool_state_dict_dir2"])
 
     def init_positional_encoding(self):
         position_enc = np.array([
@@ -82,57 +109,27 @@ class IdiomLogicAnalysis:
         model.to(self.device)
         print("{} loaded!".format(checkpoint_dir))
 
-    def __call__(self, text_list, batch_size=1):
+    def __call__(self, idiom1msg, idiom2msg, batch_size=1):
         """
         :param text_list:
         :param batch_size: 为了注意力矩阵的可视化, batch_size只能为1, 即单句
         :return:
         """
-        # 异常判断
-        # if isinstance(text_list, str):
-        #     text_list = [text_list, ]
-        # len_ = len(text_list)
-        # text_list = [i for i in text_list if len(i) != 0]
-        # if len(text_list) == 0:
-        #     raise NotImplementedError("输入的文本全部为空, 长度为0!")
-        # if len(text_list) < len_:
-        #     warnings.warn("输入的文本中有长度为0的句子, 它们将被忽略掉!")
-
-        max_seq_len = max([len(text[0]) + len(text[1]) for text in text_list])
+        print([[idiom1msg, idiom2msg]])
+        max_seq_len = len(idiom1msg) + len(idiom2msg)
         # 预处理, 获取batch
         texts_tokens, positional_enc = \
-            self.process_batch(text_list, max_seq_len=max_seq_len)
+            self.process_batch([[idiom1msg, idiom2msg]], max_seq_len=max_seq_len)
         # 准备positional encoding
         positional_enc = torch.unsqueeze(positional_enc, dim=0).to(self.device)
 
-        # 正向
-        n_batches = math.ceil(len(texts_tokens) / batch_size)
-
         # 数据按mini batch切片过正向, 这里为了可视化所以吧batch size设为1
-        for i in range(n_batches):
-            start = i * batch_size
-            end = start + batch_size
-            # 切片
-            texts_tokens_ = texts_tokens[start: end].to(self.device)
+        texts_tokens = texts_tokens.to(self.device)
 
-            predictions = self.bert_model.forward(text_input=texts_tokens_,
-                                                  positional_enc=positional_enc,
-                                                  ifPool=True
-                                                  )
-
-            self.multiClsIdiomInference(predictions)
-
-    # 根据预测结果输出信息
-    def multiClsIdiomInference(self, predictions):
+        predictions = self.bipool_bert_model2.forward(text_input=texts_tokens,
+                                                      positional_enc=positional_enc,
+                                                      ifPool=True)
         print(predictions)
-
-    def sentiment_print_func(self, text, pred, threshold):
-        print(text)
-        if pred >= threshold:
-            print("正样本, 输出值{:.2f}".format(pred))
-        else:
-            print("负样本, 输出值{:.2f}".format(pred))
-        print("----------")
 
     def find_most_recent_state_dict(self, dir_path):
         """
@@ -149,7 +146,7 @@ class IdiomLogicAnalysis:
 
 # 获取两个成语的解释和举例
 def getExplanationAndExample(idiom1, idiom2, idiomDict):
-    print(idiom1 + " " + idiom2)
+    # print(idiom1 + " " + idiom2)
     dic1 = idiomDict.get(idiom1)
     dic2 = idiomDict.get(idiom2)
     if dic1 == None:  # 在idiomDict中查找 若没有 则跳过
@@ -170,20 +167,53 @@ def getExplanationAndExample(idiom1, idiom2, idiomDict):
     return explanation1, example1, explanation2, example2
 
 
-if __name__ == '__main__':
-    model = IdiomLogicAnalysis(max_seq_len=300, batch_size=1)
-    InputIdiom = [
-        # ["墨守成规", "安于现状"], # 1
-        # ["报仇雪恨", "饮恨吞声"], # 2
-        # ["饱食终日", "饥肠辘辘"], # 2
-        # ["浑浑噩噩", "懒懒散散"], # 1
-        # ["好吃懒做", "衣来伸手,饭来张口"], # 1
-        # ["白纸黑字","口说无凭"],  # 2
-        # ["胸有成竹", "十拿九稳"],  # 1
-        ["报仇雪恨", "曲意奉迎"],   # 2
-        # ["络绎不绝", "比肩接踵"]  # 1
-    ]
+"""
+后端接口:POST请求
+POST请求数据:idiom1: 成语1
+            idiom2: 成语2
+            model_type: 0->多分类模型 1->二分类模型
+            ifPool: True使用mean max pool;False使用CLS向量
+返回数据: 二分类: p1是并列关系的概率, p2是转折关系的概率
+         多分类: p0无逻辑关系的概率, p1是并列关系的概率, p2是转折关系的概率
+"""
 
+
+@app.route("/get_res", methods=["POST"])
+def idiom_api():
+    if request.method == "POST":
+        idiom1 = request.form["idiom1"]
+        idiom2 = request.form["idiom2"]
+        model_type = request.form["model_type"]
+        ifPool = request.form["ifPool"]
+        # print("{} {} {} {}".format(idiom1, idiom2, model_type, ifPool))
+        # 获取两个成语的解释与造句
+        explanation1, example1, explanation2, example2 = getExplanationAndExample(idiom1, idiom2, idiomDict)
+        if explanation1 is None:
+            print(idiom1 + "不是成语")
+            return jsonify({"status": 1})
+        if explanation2 is None:
+            print(idiom2 + "不是成语")
+            return jsonify({"status": 2})
+
+        model(explanation1 if example1 == "无" else explanation1 + example1,
+              explanation2 if example2 == "无" else explanation2 + example2,
+              batch_size=1)
+        # print(predictions)
+        # model(textList, batch_size=1)
+
+        return jsonify({
+            "status": 0,
+            "p1": 0.92,
+            "p2": 0.02,
+        })
+
+
+if __name__ == "__main__":
+    print("######加载模型中######")
+    model = IdiomLogicAnalysis(max_seq_len=300)
+    print("######加载模型完毕######")
+
+    print("######加载新华字典数据集######")
     idiomDict = {}
     # 读取idiom.json中的数据 重构f
     with open('corpus/idiom.json', 'r', encoding="utf-8") as f:
@@ -194,20 +224,8 @@ if __name__ == '__main__':
             idiomDict[word] = {}
             idiomDict[word]["explanation"] = data["explanation"]
             idiomDict[word]["example"] = data["example"]
-
-    # 获得成语的解释 举例
-    textList = []
-    for idiom_i in InputIdiom:
-        explanation1, example1, explanation2, example2 = getExplanationAndExample(idiom_i[0], idiom_i[1], idiomDict)
-        if explanation1 == None:
-            print(idiom_i[0] + "不是成语")
-            continue
-
-        if explanation2 == None:
-            print(idiom_i[1] + "不是成语")
-            continue
-
-        textList.append([explanation1 if example1 == "无" else explanation1 + example1,
-                         explanation2 if example2 == "无" else explanation2 + example2])
-    # print(textList)
-    model(textList)
+    print("######加载完毕######")
+    # model([["只有一个心眼儿，没有别的考虑。 所以彭官保便一心一意的料理防守事宜，庄制军便一心一意料理军需器械。",
+    #         "又想这样又想那样，犹豫不定。常指不安心，不专一。 可是眼下大敌当前，后有追兵，你可千万不要三心二意，迟疑不决，误了大事。"]]
+    #       ,batch_size=1)
+    app.run()
