@@ -88,6 +88,7 @@ class IdiomLogicAnalysis:
         self.load_model(self.bicls_bert_model2, dir_path=self.config["bi_cls_state_dict_dir2"])
         self.load_model(self.bipool_bert_model2, dir_path=self.config["bi_pool_state_dict_dir2"])
 
+    # 位置编码
     def init_positional_encoding(self):
         position_enc = np.array([
             [pos / np.power(10000, 2 * i / self.hidden_dim) for i in range(self.hidden_dim)]
@@ -101,6 +102,7 @@ class IdiomLogicAnalysis:
         position_enc = torch.from_numpy(position_enc).type(torch.FloatTensor)
         return position_enc
 
+    # 加载模型
     def load_model(self, model, dir_path="../output"):
         checkpoint_dir = self.find_most_recent_state_dict(dir_path)
         checkpoint = torch.load(checkpoint_dir)
@@ -109,6 +111,7 @@ class IdiomLogicAnalysis:
         model.to(self.device)
         print("{} loaded!".format(checkpoint_dir))
 
+    # 模型推断
     def __call__(self, idiom1msg, idiom2msg, batch_size=1):
         """
         :param text_list:
@@ -131,6 +134,7 @@ class IdiomLogicAnalysis:
                                                       ifPool=True)
         print(predictions)
 
+    # 寻找模型加载文件
     def find_most_recent_state_dict(self, dir_path):
         """
         :param dir_path: 存储所有模型文件的目录
@@ -149,9 +153,9 @@ def getExplanationAndExample(idiom1, idiom2, idiomDict):
     # print(idiom1 + " " + idiom2)
     dic1 = idiomDict.get(idiom1)
     dic2 = idiomDict.get(idiom2)
-    if dic1 == None:  # 在idiomDict中查找 若没有 则跳过
+    if dic1 is None:  # 在idiomDict中查找 若没有 则跳过
         return None, None, 0, 0
-    if dic2 == None:
+    if dic2 is None:
         return 0, 0, None, None
 
     example1 = dic1['example']
@@ -225,7 +229,4 @@ if __name__ == "__main__":
             idiomDict[word]["explanation"] = data["explanation"]
             idiomDict[word]["example"] = data["example"]
     print("######加载完毕######")
-    # model([["只有一个心眼儿，没有别的考虑。 所以彭官保便一心一意的料理防守事宜，庄制军便一心一意料理军需器械。",
-    #         "又想这样又想那样，犹豫不定。常指不安心，不专一。 可是眼下大敌当前，后有追兵，你可千万不要三心二意，迟疑不决，误了大事。"]]
-    #       ,batch_size=1)
     app.run()
