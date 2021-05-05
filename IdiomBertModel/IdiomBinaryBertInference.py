@@ -24,12 +24,14 @@ class IdiomLogicAnalysis:
     def __init__(self, max_seq_len,
                  batch_size,
                  with_cuda=True,  # 是否使用GPU, 如未找到GPU, 则自动切换CPU
+                 ifPool=True
                  ):
         config_ = configparser.ConfigParser()
         config_.read("./config/idiom_model_config.ini")
         self.config = config_["DEFAULT"]
         self.vocab_size = int(self.config["vocab_size"])
         self.batch_size = batch_size
+        self.ifPool = ifPool
         # 加载字典
         with open(self.config["word2idx_path"], "r", encoding="utf-8") as f:
             self.word2idx = json.load(f)
@@ -47,6 +49,13 @@ class IdiomLogicAnalysis:
         # 开去evaluation模型, 关闭模型内部的dropout层
         self.bert_model.eval()
 
+        # 初始化BERT情感分析模型
+        self.bert_model2 = Bert_Idiom_Analysis_v2(config=bertconfig)
+        # 将模型发送到计算设备(GPU或CPU)
+        self.bert_model2.to(self.device)
+        # 开去evaluation模型, 关闭模型内部的dropout层
+        self.bert_model2.eval()
+
         # 初始化位置编码
         self.hidden_dim = bertconfig.hidden_size
         self.positional_enc = self.init_positional_encoding()
@@ -58,8 +67,14 @@ class IdiomLogicAnalysis:
         self.process_batch = InferenceDataset(hidden_dim=bertconfig.hidden_size,
                                               max_positions=max_seq_len,
                                               word2idx=self.word2idx)
-        # 加载BERT预训练模型
-        self.load_model(self.bert_model, dir_path=self.config["state_dict_dir"])
+        if ifPool:
+            # 加载BERT预训练模型
+            self.load_model(self.bert_model, dir_path=self.config["bi_pool_state_dict_dir"])
+            self.load_model(self.bert_model2, dir_path=self.config["bi_pool_state_dict_dir2"])
+        else:
+            # 加载BERT预训练模型
+            self.load_model(self.bert_model, dir_path=self.config["bi_cls_state_dict_dir"])
+            self.load_model(self.bert_model2, dir_path=self.config["bi_cls_state_dict_dir2"])
 
     def init_positional_encoding(self):
         position_enc = np.array([
@@ -118,12 +133,17 @@ class IdiomLogicAnalysis:
             # 切片
             texts_tokens_ = texts_tokens[start: end].to(self.device)
 
-            predictions = self.bert_model.forward(text_input=texts_tokens_,
+            prediction1 = self.bert_model.forward(text_input=texts_tokens_,
                                                   positional_enc=positional_enc,
-                                                  ifPool=True
+                                                  ifPool=self.ifPool
+                                                  )
+            prediction2 = self.bert_model2.forward(text_input=texts_tokens_,
+                                                  positional_enc=positional_enc,
+                                                  ifPool=self.ifPool
                                                   )
 
-            self.multiClsIdiomInference(predictions)
+            self.multiClsIdiomInference(prediction1)
+            self.multiClsIdiomInference(prediction2)
 
     # 根据预测结果输出信息
     def multiClsIdiomInference(self, predictions):
@@ -174,24 +194,27 @@ def getExplanationAndExample(idiom1, idiom2, idiomDict):
 
 
 if __name__ == '__main__':
-    model = IdiomLogicAnalysis(max_seq_len=300, batch_size=1)
+    # 二分类 mean max pool
+    model = IdiomLogicAnalysis(max_seq_len=300, batch_size=1, ifPool=True)
+    # 二分类 cls
+    # model = IdiomLogicAnalysis(max_seq_len=300, batch_size=1, ifPool=False)
     InputIdiom = [
         # cls_type = 1
-        # ["百家争鸣", "入主出奴"], # 0
-        # ["白驹过隙", "逝者如斯"], # 1
-        # ["安居乐业", "家给人足"], # 1
-        # ["解骖推食", "马浡牛溲"], # 0
-        # ["爱不释手", "怦然心动"], # 1
-        # ["春色满园", "春意盎然"]  # 1
+        ["百家争鸣", "入主出奴"], # 0
+        ["白驹过隙", "逝者如斯"], # 1
+        ["安居乐业", "家给人足"], # 1
+        ["解骖推食", "马浡牛溲"], # 0
+        ["爱不释手", "怦然心动"], # 1
+        ["春色满园", "春意盎然"]  # 1
         # cls_type = 2
-        ["安然无恙", "千疮百孔"],  # 1
-        ["三心二意", "一心一意"],  # 1
-        ["爱不释手", "夺人所好"],  # 1
-        ["白头偕老", "山盟海誓"],  # 0
-        ["举国上下", "万众一心"],  # 0
-        ["白璧无瑕", "十全十美"],  # 0
-        ["安居乐业", "寸草不生"],  # 1
-        ["暴风骤雨", "泰然自若"]  # 1
+        # ["安然无恙", "千疮百孔"],  # 1
+        # ["三心二意", "一心一意"],  # 1
+        # ["爱不释手", "夺人所好"],  # 1
+        # ["白头偕老", "山盟海誓"],  # 0
+        # ["举国上下", "万众一心"],  # 0
+        # ["白璧无瑕", "十全十美"],  # 0
+        # ["安居乐业", "寸草不生"],  # 1
+        # ["暴风骤雨", "泰然自若"]  # 1
     ]
 
     idiomDict = {}

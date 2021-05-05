@@ -24,12 +24,14 @@ class IdiomLogicAnalysis:
     def __init__(self, max_seq_len,
                  batch_size,
                  with_cuda=True,  # 是否使用GPU, 如未找到GPU, 则自动切换CPU
+                 ifPool=True
                  ):
         config_ = configparser.ConfigParser()
         config_.read("./config/idiom_model_config.ini")
         self.config = config_["DEFAULT"]
         self.vocab_size = int(self.config["vocab_size"])
         self.batch_size = batch_size
+        self.ifPool = ifPool
         # 加载字典
         with open(self.config["word2idx_path"], "r", encoding="utf-8") as f:
             self.word2idx = json.load(f)
@@ -59,7 +61,7 @@ class IdiomLogicAnalysis:
                                               max_positions=max_seq_len,
                                               word2idx=self.word2idx)
         # 加载BERT预训练模型
-        self.load_model(self.bert_model, dir_path=self.config["state_dict_dir"])
+        self.load_model(self.bert_model, dir_path=self.config["multi_pool_state_dict_dir" if ifPool else "multi_cls_state_dict_dir"])
 
     def init_positional_encoding(self):
         position_enc = np.array([
@@ -88,16 +90,6 @@ class IdiomLogicAnalysis:
         :param batch_size: 为了注意力矩阵的可视化, batch_size只能为1, 即单句
         :return:
         """
-        # 异常判断
-        # if isinstance(text_list, str):
-        #     text_list = [text_list, ]
-        # len_ = len(text_list)
-        # text_list = [i for i in text_list if len(i) != 0]
-        # if len(text_list) == 0:
-        #     raise NotImplementedError("输入的文本全部为空, 长度为0!")
-        # if len(text_list) < len_:
-        #     warnings.warn("输入的文本中有长度为0的句子, 它们将被忽略掉!")
-
         max_seq_len = max([len(text[0]) + len(text[1]) for text in text_list])
         # 预处理, 获取batch
         texts_tokens, positional_enc = \
@@ -117,7 +109,7 @@ class IdiomLogicAnalysis:
 
             predictions = self.bert_model.forward(text_input=texts_tokens_,
                                                   positional_enc=positional_enc,
-                                                  ifPool=True
+                                                  ifPool=self.ifPool
                                                   )
 
             self.multiClsIdiomInference(predictions)
@@ -171,7 +163,10 @@ def getExplanationAndExample(idiom1, idiom2, idiomDict):
 
 
 if __name__ == '__main__':
-    model = IdiomLogicAnalysis(max_seq_len=300, batch_size=1)
+    # mean max pool 多分类推断
+    # model = IdiomLogicAnalysis(max_seq_len=300, batch_size=1, ifPool=True)
+    # Cls 多分类推断
+    model = IdiomLogicAnalysis(max_seq_len=300, batch_size=1, ifPool=False)
     InputIdiom = [
         # ["墨守成规", "安于现状"], # 1
         # ["报仇雪恨", "饮恨吞声"], # 2
@@ -179,8 +174,8 @@ if __name__ == '__main__':
         # ["浑浑噩噩", "懒懒散散"], # 1
         # ["好吃懒做", "衣来伸手,饭来张口"], # 1
         # ["白纸黑字","口说无凭"],  # 2
-        # ["胸有成竹", "十拿九稳"],  # 1
-        ["报仇雪恨", "曲意奉迎"],   # 2
+        ["胸有成竹", "十拿九稳"],  # 1
+        # ["报仇雪恨", "曲意奉迎"],   # 2
         # ["络绎不绝", "比肩接踵"]  # 1
     ]
 
