@@ -1,8 +1,10 @@
 <template>
   <div class="screen-container">
     <el-container>
-      <el-header>Header</el-header>
-      <el-main>Main</el-main>
+      <el-header></el-header>
+      <el-main>
+        <div>123</div>
+      </el-main>
     </el-container>
   </div>
 </template>
@@ -28,6 +30,7 @@ export default {
     border-radius: 10px;
     letter-spacing: 10px;
     height: 40px !important;
+    background-color: blue;
   }
   .el-container {
     padding-left: 0;
@@ -36,5 +39,6 @@ export default {
   }
   .el-main {
     padding: 0px !important;
+    background-color: green;
   }
 </style>
