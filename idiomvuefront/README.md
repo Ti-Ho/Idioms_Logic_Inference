@@ -1,4 +1,4 @@
-# idiomfrontvue
+# idiomvuefront
 
 ## Project setup
 ```
