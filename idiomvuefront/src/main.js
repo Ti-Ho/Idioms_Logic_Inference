@@ -9,6 +9,7 @@ axios.defaults.baseURL = 'http://localhost:5000/';
 // 将axios挂载到Vue的原型对象上
 Vue.prototype.$http = axios;
 Vue.use(ElementUI);
+
 new Vue({
   render: h => h(App),
 }).$mount('#app');
