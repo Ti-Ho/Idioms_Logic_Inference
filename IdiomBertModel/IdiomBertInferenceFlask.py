@@ -222,6 +222,10 @@ def idiom_api():
         return jsonify({
             "status": 0,
             "predictions": predictions,
+            "explanation1": explanation1,
+            "example1": example1,
+            "explanation2": explanation2,
+            "example2": example2
         })
 
 
