@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="margin-left: 10px; margin-right: 10px;">
         <!--     form 表单      -->
         <el-form ref="form" :model="form" label-width="120px" label-position="left">
             <el-row><div class="step-font">步骤1: 输入成语</div></el-row>
