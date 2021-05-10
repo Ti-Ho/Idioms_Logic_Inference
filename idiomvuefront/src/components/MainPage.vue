@@ -56,7 +56,17 @@
         <el-divider></el-divider>
         <!--     结果图表      -->
         <el-row style="height: 55%">
-          <div class="step-font">模型推断结果</div>
+          <el-row>
+            <div class="step-font">模型推断结果</div>
+          </el-row>
+          <!-- 有数据 显示图表 -->
+          <el-row v-if="hasRes==true" style="margin:0px; height:95%">
+            <div style="margin:0px">显示图表</div>
+          </el-row>
+          <!-- 无数据 显示其它 -->
+          <el-row v-else style="margin:0px; height:95%">
+            <div style="margin:0px">显示其它</div>
+          </el-row>
         </el-row>
       </el-main>
     </el-container>
@@ -72,18 +82,21 @@ export default {
         idiom1: '',
         idiom2: '',
         model_type: '二分类模型',
-        ifPool: '使用mean max pool输出层'
-      }
+        ifPool: '使用mean max pool输出层',
+      },
+      hasRes: false
     }
   },
   methods: {
     onSubmit() {
+      this.hasRes = !this.hasRes;
       console.log('submit!');
       console.log(this.form);
     },
     clear() {
       this.form.idiom1 = '';
       this.form.idiom2 = '';
+      this.hasRes = false;
     }
   }
 }
@@ -103,10 +116,14 @@ export default {
   height: 100% !important;
 }
 .el-header{
-  background-color: #B3C0D1;
-  color: #333;
+  background-color: #000;
+  color: white;
   text-align: center;
   line-height: 60px;
+  font-weight: bolder;
+  font-size: larger;
+  border-radius: 15px;
+  margin-bottom: 5px;
 }
 .el-main {
   padding: 0px !important;
