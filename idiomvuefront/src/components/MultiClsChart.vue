@@ -1,5 +1,7 @@
 <template>
-  <div class="com-chart" ref="multiPieChart_ref"></div>
+  <div style="width: 100%; height: 100%; margin: 0px">
+    <div style="width: 70%; height: 100%; margin: 10px;" class="com-chart" ref="multiPieChart_ref"></div>
+  </div>
 </template>
 
 <script>
@@ -26,7 +28,8 @@ export default {
         title: {
           text: '多分类模型推断结果',
           subtext: '纯属虚构',
-          left: 'center'
+          left: 'center',
+          top: '5%',
         },
         tooltip: {
           trigger: 'item'
@@ -34,6 +37,7 @@ export default {
         legend: {
           orient: 'vertical',
           left: 'left',
+          top: '5%'
         },
         series: [
           {

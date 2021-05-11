@@ -52,16 +52,16 @@
         </el-form>
         <el-divider></el-divider>
         <!--     结果图表      -->
-        <el-row style="height: 55%">
+        <el-row style="height: 45%">
             <el-row>
                 <div class="step-font">模型推断结果</div>
             </el-row>
             <!-- 有数据 显示图表 -->
             <el-row v-if="hasRes==true" style="margin:0px; height:92%">
-                <div style="margin:0px; border-style: inset; height: 100%" v-if="form.model_type=='二分类模型'">
+                <div style="margin:0px; height: 100%" v-if="form.model_type=='二分类模型'">
                     <BinaryClsChart :p1="p1" :p2="p2"></BinaryClsChart>
                 </div>
-                <div style="margin:0px; border-style: inset; height: 100%" v-else>
+                <div style="margin:0px; height: 100%" v-else>
                     <MultiClsChart :p0="p0" :p1="p1" :p2="p2"></MultiClsChart>
                 </div>
             </el-row>
@@ -98,7 +98,7 @@ export default {
   },
   methods: {
     onSubmit() {
-      // Todo 与后端连接后 修改hasres的逻辑修改
+      // Todo 与后端连接后 修改hasRes的逻辑修改
       this.hasRes = !this.hasRes;
       console.log('submit!');
       console.log(this.form);
