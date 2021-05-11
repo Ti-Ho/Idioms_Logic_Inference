@@ -91,9 +91,9 @@ export default {
         ifPool: '使用mean max pool输出层',
       },
       hasRes: false,
-      p0: 'p0',
-      p1: 'p1',
-      p2: 'p2'
+      p0: 0.01,
+      p1: 0.02,
+      p2: 0.03
     }
   },
   methods: {

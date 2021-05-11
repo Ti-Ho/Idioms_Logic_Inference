@@ -11,6 +11,9 @@ axios.defaults.baseURL = 'http://localhost:5000/';
 Vue.prototype.$http = axios;
 Vue.use(ElementUI);
 
+// Echarts
+Vue.prototype.$echarts = window.echarts
+
 new Vue({
   render: h => h(App),
 }).$mount('#app');
