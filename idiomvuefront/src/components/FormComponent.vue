@@ -1,5 +1,5 @@
 <template>
-    <div style="margin-left: 10px; margin-right: 10px;">
+    <div style="margin-left: 10px; margin-right: 10px; height: 100%">
         <!--     form 表单      -->
         <el-form ref="form" :model="form" label-width="120px" label-position="left">
             <el-row><div class="step-font">步骤1: 输入成语</div></el-row>
@@ -19,20 +19,20 @@
             <el-divider></el-divider>
             <el-row><div class="step-font">步骤2: 选择推断模型</div></el-row>
             <el-row>
-                <el-col :span="7">
+                <el-col :span="8">
                     <el-form-item label="选择模型">
                         <el-radio-group v-model="form.model_type">
-                            <el-radio label="二分类模型"></el-radio>
-                            <el-radio label="多分类模型"></el-radio>
+                            <el-radio label="二分类模型" border></el-radio>
+                            <el-radio label="多分类模型" border></el-radio>
                         </el-radio-group>
                     </el-form-item>
                 </el-col>
-                <el-col :span="2"><div class="grid-content"></div></el-col>
-                <el-col :span="10">
+                <el-col :span="1"><div class="grid-content"></div></el-col>
+                <el-col :span="11">
                     <el-form-item label="选择输出层结构">
                         <el-radio-group v-model="form.ifPool">
-                            <el-radio label="使用mean max pool输出层"></el-radio>
-                            <el-radio label="使用CLS向量推断"></el-radio>
+                            <el-radio label="使用mean max pool输出层" border></el-radio>
+                            <el-radio label="使用CLS向量推断" border></el-radio>
                         </el-radio-group>
                     </el-form-item>
                 </el-col>
@@ -57,17 +57,17 @@
                 <div class="step-font">模型推断结果</div>
             </el-row>
             <!-- 有数据 显示图表 -->
-            <el-row v-if="hasRes==true" style="margin:0px; height:95%">
-                <div style="margin:0px" v-if="form.model_type=='二分类模型'">
+            <el-row v-if="hasRes==true" style="margin:0px; height:92%">
+                <div style="margin:0px; border-style: inset; height: 100%" v-if="form.model_type=='二分类模型'">
                     <BinaryClsChart :p1="p1" :p2="p2"></BinaryClsChart>
                 </div>
-                <div style="margin:0px" v-else>
+                <div style="margin:0px; border-style: inset; height: 100%" v-else>
                     <MultiClsChart :p0="p0" :p1="p1" :p2="p2"></MultiClsChart>
                 </div>
             </el-row>
             <!-- 无数据 显示其它 -->
-            <el-row v-else style="margin:0px; height:95%">
-                <div style="margin:0px">显示其它</div>
+            <el-row v-else style="margin:0px; height: 92%">
+                <div style="margin:0px; border-style: inset; height: 100%">显示其它</div>
             </el-row>
         </el-row>
     </div>

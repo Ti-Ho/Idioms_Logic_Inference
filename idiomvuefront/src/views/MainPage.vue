@@ -84,11 +84,11 @@ export default {
   height: 100% !important;
 }
 .el-header{
-  background-color: #000;
-  color: white;
+  background-color: #161522;
+  color: #eeeeee;
   text-align: center;
   line-height: 60px;
-  font-weight: bolder;
+  font-weight: bold;
   font-size: larger;
   /*border-radius: 15px;*/
   margin-bottom: 5px;
