@@ -1,7 +1,20 @@
 <template>
   <div class="screen-container">
     <el-container>
-      <el-header>汉语成语逻辑关系推断可视化面板</el-header>
+      <el-header>
+        <div>
+          汉语成语逻辑关系推断可视化面板
+        </div>
+
+        <a href="https://github.com/Ti-Ho/Idioms_Logic_Inference">
+          <div class="head-right">
+              <img src="/static/img/github.png" style="height: 30px;" >
+          </div>
+          <div class="head-right-text">
+              GitHub
+          </div>
+        </a>
+      </el-header>
       <el-container>
         <el-aside width="200px">
           <el-menu
@@ -78,7 +91,7 @@ export default {
   height: 100% !important;
 }
 .el-header{
-  background-color: #161522;
+  background-color: #505050;
   color: #eeeeee;
   text-align: center;
   line-height: 60px;
@@ -90,5 +103,35 @@ export default {
 }
 .el-main {
   padding: 0px !important;
+}
+.head-right {
+  position: absolute;
+  right: 120px;
+  cursor: pointer;
+  top: 7px;
+}
+.head-right-text {
+  position: absolute;
+  right: 30px;
+  cursor: pointer;
+  top: 1px;
+  /*color: white;*/
+  font-size: medium;
+}
+a:link {
+  color: black;
+  text-decoration:underline;
+}
+a:visited {
+  color: black;
+  text-decoration:none;
+}
+a:hover {
+  color: white;
+  text-decoration:none;
+}
+a:active {
+  color:#FFFFFF;
+  text-decoration:none;
 }
 </style>
