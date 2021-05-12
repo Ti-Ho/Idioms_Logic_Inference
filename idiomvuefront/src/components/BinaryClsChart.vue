@@ -1,6 +1,10 @@
 <template>
   <div style="width: 100%; height: 100%; margin: 0px">
-      <div style="width: 70%; height: 100%; margin: 10px;" class="com-chart" ref="binaryPieChart_ref"></div>
+      <el-row>
+          <el-col :span=10>
+              <div class="com-chart" ref="binaryPieChart_ref"></div>
+          </el-col>
+      </el-row>
   </div>
 </template>
 
@@ -39,11 +43,11 @@ export default {
           top: '5%',
         },
         // Todo 修改grid
-        // grid: {
-        //   left: "10%",
-        //   top: "0%",
-        //   show: true
-        // },
+        grid: {
+          left: "10%",
+          top: "30%",
+          // show: true
+        },
         series: [
           {
             name: '访问来源',
@@ -75,5 +79,13 @@ export default {
   height: 100%;
   overflow: hidden;
   /*border-radius: 20px;*/
+}
+.el-row {
+    margin-bottom: 0px;
+    height: 100%;
+}
+.el-col {
+    border-radius: 4px;
+    height: 100%;
 }
 </style>

@@ -20,19 +20,25 @@ import json
 import pandas as pd
 
 def getsoup(url):
-    # 关闭弹窗
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--headless')
-    chrome_options.add_argument('--disable-gpu')
-    chrome_options.add_argument("service_args=['--ignore-ssl-errors=true', '--ssl-protocol=TLSv1']")
-    brower = webdriver.Chrome(options=chrome_options)
+    try:
+        # 关闭弹窗
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument("service_args=['--ignore-ssl-errors=true', '--ssl-protocol=TLSv1']")
+        brower = webdriver.Chrome(options=chrome_options)
 
-    brower.get(url)
-    wait = WebDriverWait(brower, 10)
-    wait.until(EC.presence_of_element_located((By.ID, 'main')))
-    soup = BeautifulSoup(brower.page_source, 'html.parser')
-    brower.close()
-    return soup
+        brower.get(url)
+        wait = WebDriverWait(brower, 10)
+        wait.until(EC.presence_of_element_located((By.ID, 'main')))
+        soup = BeautifulSoup(brower.page_source, 'html.parser')
+        brower.close()
+        return soup
+    except Exception as e:
+        print('获取详情页失败：{}'.format(e))
+        # 清除 cookie
+        brower.delete_all_cookies()
+        return None
 
 def getidiom(idiom):
     """
@@ -45,6 +51,11 @@ def getidiom(idiom):
     url = base_url + '/s?wd=' + parse.quote(idiom)
     # 获取成语网页的soup
     soup = getsoup(url)
+    if soup is None:
+        # 再试一次
+        soup = getsoup(url)
+        if soup is None:
+            return [], []
     # 获取近义成语
     text = soup.findAll(id='synonym')
     synIdiomList = []
