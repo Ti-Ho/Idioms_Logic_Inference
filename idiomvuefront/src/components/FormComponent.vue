@@ -92,8 +92,8 @@ export default {
       },
       hasRes: false,
       p0: 0.01,
-      p1: 0.02,
-      p2: 0.03
+      p1: 0.25,
+      p2: 0.98
     }
   },
   methods: {

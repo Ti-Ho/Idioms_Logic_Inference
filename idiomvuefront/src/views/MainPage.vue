@@ -5,20 +5,20 @@
         <div>
           汉语成语逻辑关系推断可视化面板
         </div>
-
         <a href="https://github.com/Ti-Ho/Idioms_Logic_Inference">
           <div class="head-right">
-              <img src="/static/img/github.png" style="height: 30px;" >
+              <img src="/static/img/github.png" style="height: 25px;" >
           </div>
           <div class="head-right-text">
               GitHub
           </div>
         </a>
       </el-header>
-      <el-container>
+      <el-divider></el-divider>
+      <el-container style="margin-left: 30px; margin-right: 30px;">
         <el-aside width="200px">
           <el-menu
-                  default-active="2"
+                  default-active="1"
                   class="el-menu-vertical-demo"
                   @open="handleOpen"
                   @close="handleClose"
@@ -91,14 +91,14 @@ export default {
   height: 100% !important;
 }
 .el-header{
-  background-color: #505050;
-  color: #eeeeee;
+  background-color: white;
+  color: #202020;
   text-align: center;
   line-height: 60px;
   font-weight: bold;
   font-size: larger;
   /*border-radius: 15px;*/
-  margin-bottom: 5px;
+  margin-bottom: 0px;
   letter-spacing: 4px;
 }
 .el-main {
@@ -112,11 +112,12 @@ export default {
 }
 .head-right-text {
   position: absolute;
-  right: 30px;
+  right: 50px;
   cursor: pointer;
-  top: 1px;
+  top: 2px;
   /*color: white;*/
   font-size: medium;
+  letter-spacing: 1px;
 }
 a:link {
   color: black;
@@ -127,11 +128,16 @@ a:visited {
   text-decoration:none;
 }
 a:hover {
-  color: white;
+  color: #999999;
   text-decoration:none;
 }
 a:active {
-  color:#FFFFFF;
+  color: #999999;
   text-decoration:none;
+}
+.el-divider {
+    margin-top: 0px;
+    margin-bottom: 3px;
+    height: 3px;
 }
 </style>
