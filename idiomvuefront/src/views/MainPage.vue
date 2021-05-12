@@ -53,7 +53,9 @@
           </el-menu>
         </el-aside>
         <el-main>
-          <FormComponent v-if="this.componentId=='1'"></FormComponent>
+          <FormComponent v-if="this.componentId==='1'"></FormComponent>
+          <modelCompareComponent v-else-if="this.componentId==='2'"></modelCompareComponent>
+          <modelStructureComponent v-else></modelStructureComponent>
         </el-main>
       </el-container>
     </el-container>
@@ -62,10 +64,14 @@
 
 <script>
 import FormComponent from "@/components/FormComponent";
+import modelCompareComponent from "@/components/modelCompareComponent";
+import modelStructureComponent from "@/components/modelStructureComponent";
 export default {
   name: "MainPage",
   components: {
-    FormComponent
+    FormComponent,
+    modelCompareComponent,
+    modelStructureComponent,
   },
   data() {
     return {
