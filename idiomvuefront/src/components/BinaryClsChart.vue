@@ -24,6 +24,7 @@ export default {
   data() {
     return {
       chartInstance: null,
+      chartInstance2: null,
       res: ''
     }
   },

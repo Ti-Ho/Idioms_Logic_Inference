@@ -40,13 +40,13 @@
               </template>
               <el-menu-item-group>
                 <template slot="title">二分类</template>
-                <el-menu-item index="3-1">二分类 MeanMaxPool</el-menu-item>
-                <el-menu-item index="3-2">二分类 CLS分类</el-menu-item>
+                <el-menu-item index="3-1" style="font-size: x-small">二分类 MeanMaxPool</el-menu-item>
+                <el-menu-item index="3-2" style="font-size: x-small">二分类 CLS分类</el-menu-item>
               </el-menu-item-group>
               <el-menu-item-group>
                 <template slot="title">多分类</template>
-                <el-menu-item index="3-3">多分类 MeanMaxPool</el-menu-item>
-                <el-menu-item index="3-4">多分类 CLS分类</el-menu-item>
+                <el-menu-item index="3-3" style="font-size: x-small">多分类 MeanMaxPool</el-menu-item>
+                <el-menu-item index="3-4" style="font-size: x-small">多分类 CLS分类</el-menu-item>
               </el-menu-item-group>
             </el-submenu>
           </el-menu>
