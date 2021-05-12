@@ -24,6 +24,7 @@ def getsoup(url):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument("service_args=['--ignore-ssl-errors=true', '--ssl-protocol=TLSv1']")
     brower = webdriver.Chrome(options=chrome_options)
 
     brower.get(url)
@@ -110,11 +111,9 @@ if __name__ == '__main__':
     flag = True
     cnt = 0
     tot = len(allIdioms)
-    for idiom_item in allIdioms:
+    for i, idiom_item in enumerate(allIdioms):
         # 输出进度
-        if cnt % 100 == 0:
-            print("爬取第{}条成语的数据,总共{}条".format(cnt + 1, tot))
-            cnt += 1
+        print("爬取第{}条成语的数据,总共{}条".format(i + 1, tot))
         # 爬取数据
         allData = []
         synIdiomList, antoIdiomList = getidiom(idiom_item)
