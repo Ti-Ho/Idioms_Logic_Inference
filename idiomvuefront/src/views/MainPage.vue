@@ -22,6 +22,7 @@
                   class="el-menu-vertical-demo"
                   @open="handleOpen"
                   @close="handleClose"
+                  @select="changeComponent"
                   background-color="#545c64"
                   text-color="#fff"
                   active-text-color="#ffd04b">
@@ -52,7 +53,7 @@
           </el-menu>
         </el-aside>
         <el-main>
-          <FormComponent></FormComponent>
+          <FormComponent v-if="this.componentId=='1'"></FormComponent>
         </el-main>
       </el-container>
     </el-container>
@@ -66,12 +67,21 @@ export default {
   components: {
     FormComponent
   },
+  data() {
+    return {
+      componentId : '1',
+    }
+  },
   methods: {
     handleOpen(key, keyPath) {
       console.log(key, keyPath);
     },
     handleClose(key, keyPath) {
       console.log(key, keyPath);
+    },
+    changeComponent(index) {
+      this.componentId = index;
+      console.log(this.componentId);
     }
   }
 }
