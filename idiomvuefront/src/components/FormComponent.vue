@@ -54,7 +54,8 @@
         <!--     结果图表      -->
         <el-row style="height: 45%">
             <el-row>
-                <div class="step-font">模型推断结果</div>
+                <div class="step-font" v-if="hasRes">模型推断结果</div>
+                <div class="step-font" v-else>推断结果示例</div>
             </el-row>
             <!-- 有数据 显示图表 -->
             <el-row v-if="hasRes==true" style="margin:0px; height:92%">
@@ -65,9 +66,9 @@
                     <MultiClsChart :p0="p0" :p1="p1" :p2="p2"></MultiClsChart>
                 </div>
             </el-row>
-            <!-- 无数据 显示其它 -->
+            <!-- 无数据 显示示例 -->
             <el-row v-else style="margin:0px; height: 92%">
-                <div style="margin:0px; border-style: inset; height: 100%">显示其它</div>
+                <BinaryClsChart :p1=0.89 :p2=0.87></BinaryClsChart>
             </el-row>
         </el-row>
     </div>
