@@ -138,6 +138,10 @@ export default {
                 this.p1 = this.resData.predictions[1];
                 this.p2 = this.resData.predictions[2];
             }
+            this.explanation1 = this.resData.explanation1;
+            this.explanation2 = this.resData.explanation2;
+            this.example1 = this.resData.example1;
+            this.example2 = this.resData.example2;
         }
         console.log(this.resData.predictions);
     },
