@@ -19,6 +19,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import json
 import pandas as pd
 
+
 def getsoup(url):
     try:
         # 关闭弹窗
@@ -39,6 +40,7 @@ def getsoup(url):
         # 清除 cookie
         brower.delete_all_cookies()
         return None
+
 
 def getidiom(idiom):
     """
@@ -92,16 +94,43 @@ def getExplanationAndExample(idiom1, idiom2):
     explanation2 = dic2['explanation']
     return explanation1, example1, explanation2, example2
 
+
 # 保存数据
 def saveData(datalist, IsFirst):
     if len(datalist) == 0:
         return
     myDf = pd.DataFrame(datalist)
     savepath = "SynAntIdiomData.csv"
-    myDf.to_csv(savepath, mode='a', index=False, header=['idiom1', 'idiom2', 'explanation1', 'example1', 'explanation2', 'example2', 'label'] if IsFirst else None)
+    myDf.to_csv(savepath, mode='a', index=False,
+                header=['idiom1', 'idiom2', 'explanation1', 'example1', 'explanation2', 'example2',
+                        'label'] if IsFirst else None)
+
 
 if __name__ == '__main__':
-    start = time.time()
+    # 用于去重
+    all_set = set()
+    ifReconnect = False  # 是否为断开重连
+    startCrawl = True  # 开始爬虫flag
+
+    """用于程序断开后重新连接 从头爬取可注释掉"""
+    ifReconnect = True
+    startCrawl = False
+    tmp_data = pd.read_csv("SynAntIdiomData.csv")
+    # print(type(tmp_data))
+    tmp_data = tmp_data.values
+    startIdiom = ''  # 记录最后爬取的成语
+
+    for tmpDataItem in tmp_data:
+        startIdiom = tmpDataItem[0]
+        # 加入all_set()去重
+        str1 = {tmpDataItem[0] + tmpDataItem[1]}
+        str2 = {tmpDataItem[1] + tmpDataItem[0]}
+        if all_set & str1 == set() and all_set & str2 == set():
+            all_set = all_set | str1
+    """用于程序断开后重新连接 从头爬取可注释掉"""
+
+    print("开始爬虫")
+
     # 构建成语字典
     idiomDict = {}
     allIdioms = []
@@ -111,20 +140,21 @@ if __name__ == '__main__':
         preData = json.loads(lists)
         for data in preData:
             word = data["word"]
-            allIdioms.append(word)
+            if ifReconnect:
+                if word == startIdiom:
+                    startCrawl = True
+            if startCrawl:
+                allIdioms.append(word)
             idiomDict[word] = {}
             idiomDict[word]["explanation"] = data["explanation"]
             idiomDict[word]["example"] = data["example"]
 
-    # 用于去重
-    all_set = set()
     # 保存时是否添加header
-    flag = True
-    cnt = 0
+    flag = ifReconnect
     tot = len(allIdioms)
     for i, idiom_item in enumerate(allIdioms):
         # 输出进度
-        print("爬取第{}条成语的数据,总共{}条".format(i + 1, tot))
+        print("爬取第{}条成语的数据,总共{}条".format(i + 1 , tot))
         # 爬取数据
         allData = []
         synIdiomList, antoIdiomList = getidiom(idiom_item)
@@ -159,6 +189,4 @@ if __name__ == '__main__':
         saveData(allData, flag)
         flag = False
 
-    end = time.time()
-    print('Running time: %s Seconds' % (end - start))
     print("----------------------------数据爬取完毕----------------------------")
