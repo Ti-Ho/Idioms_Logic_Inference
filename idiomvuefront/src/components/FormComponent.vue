@@ -83,6 +83,7 @@
 <script>
 import BinaryClsChart from "@/components/BinaryClsChart";
 import MultiClsChart from "@/components/MultiClsChart";
+import qs from 'qs'
 export default {
   name: "FormComponent",
   components: {
@@ -91,6 +92,7 @@ export default {
   },
   data() {
     return {
+      resData: null,
       form: {
         idiom1: '',
         idiom2: '',
@@ -108,11 +110,36 @@ export default {
     }
   },
   methods: {
-    onSubmit() {
-      // Todo 与后端连接后 修改hasRes的逻辑修改
-      this.hasRes = !this.hasRes;
-      console.log('submit!');
-      console.log(this.form);
+    // 点击开始推断后的操作
+    async onSubmit() {
+        const params = qs.stringify({
+            idiom1: this.form.idiom1,
+            idiom2: this.form.idiom2,
+            model_type: (this.form.model_type === "二分类模型") ? 1 : 0,
+            ifPool: (this.form.ifPool === "使用mean max pool输出层") ? 1: 0
+        });
+        var allData = null;
+        await this.$http.post('/get_res', params)
+        .then(function (response) {
+            // console.log(response.data);
+            allData = response.data
+        })
+        .catch(function (error) {
+           console.log(error);
+        });
+        this.resData = allData;
+        if (this.resData.status === 0) {
+            this.hasRes = true;
+            if (this.form.model_type === '二分类模型') {
+                this.p1 = this.resData.predictions[0];
+                this.p2 = this.resData.predictions[1];
+            } else {
+                this.p0 = this.resData.predictions[0];
+                this.p1 = this.resData.predictions[1];
+                this.p2 = this.resData.predictions[2];
+            }
+        }
+        console.log(this.resData.predictions);
     },
     clear() {
       this.form.idiom1 = '';
