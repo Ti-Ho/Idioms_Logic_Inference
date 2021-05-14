@@ -4,16 +4,22 @@
         <el-form ref="form" :model="form" label-width="120px" label-position="left">
             <el-row><div class="step-font">步骤1: 输入成语</div></el-row>
             <el-row>
-                <el-col :span="7">
+                <el-col :span="8">
                     <el-form-item label="成语1">
-                        <el-input v-model="form.idiom1"></el-input>
+                        <el-input placeholder="请输入成语1" v-model="form.idiom1"></el-input>
                     </el-form-item>
                 </el-col>
-                <el-col :span="2"><div class="grid-content"></div></el-col>
-                <el-col :span="7">
+                <el-col :span="2" style="margin-left: 10px; margin-right: 20px;">
+                    <el-button v-if="hasRes" type="success" @click="openIdiom1msg" icon="el-icon-check" round></el-button>
+                </el-col>
+                <el-col :span="2" v-if="!hasRes" style="margin-left: 10px; margin-right: 20px;"><div class="grid-content"></div></el-col>
+                <el-col :span="8">
                     <el-form-item label="成语2">
-                        <el-input v-model="form.idiom2"></el-input>
+                        <el-input placeholder="请输入成语2" v-model="form.idiom2"></el-input>
                     </el-form-item>
+                </el-col>
+                <el-col :span="2" style="margin-left: 10px; margin-right: 20px;">
+                    <el-button v-if="hasRes" type="success" @click="openIdiom2msg" icon="el-icon-check" round></el-button>
                 </el-col>
             </el-row>
             <el-divider></el-divider>
@@ -94,7 +100,11 @@ export default {
       hasRes: false,
       p0: 0.01,
       p1: 0.02,
-      p2: 0.03
+      p2: 0.03,
+      example1: 'example1',
+      explanation1: 'explanation1',
+      example2: 'example2',
+      explanation2: 'explanation2',
     }
   },
   methods: {
@@ -108,6 +118,18 @@ export default {
       this.form.idiom1 = '';
       this.form.idiom2 = '';
       this.hasRes = false;
+    },
+    openIdiom1msg() {
+      this.$alert("成语解释: " + this.explanation1 + '<br/>' + "成语造句: " + this.example1, this.form.idiom1 + '的相关输入', {
+        confirmButtonText: '确定',
+        dangerouslyUseHTMLString: true
+      });
+    },
+    openIdiom2msg() {
+      this.$alert("成语解释: " + this.explanation2 + '<br/>' + "成语造句: " + this.example2, this.form.idiom2 + '的相关输入', {
+        confirmButtonText: '确定',
+        dangerouslyUseHTMLString: true
+      });
     }
   }
 }
