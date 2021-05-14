@@ -195,7 +195,7 @@ def idiom_api():
     POST请求数据:idiom1: 成语1
                 idiom2: 成语2
                 model_type: 0->多分类模型 1->二分类模型
-                ifPool: True使用mean max pool;False使用CLS向量
+                ifPool: 1 使用mean max pool; 0 使用CLS向量
     返回数据: 二分类: p1是并列关系的概率, p2是转折关系的概率
              多分类: p0无逻辑关系的概率, p1是并列关系的概率, p2是转折关系的概率
     """
