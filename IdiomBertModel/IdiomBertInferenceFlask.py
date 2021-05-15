@@ -8,9 +8,9 @@
 # 解决跨域
 from flask_cors import CORS
 from flask import Flask, request, jsonify
-from IdiomBertModel.dataset.InferenceDataset import InferenceDataset
-from IdiomBertModel.models.bert_idiom_model import *
-from IdiomBertModel.models.bert_idiom_binary_model import *
+from dataset.InferenceDataset import InferenceDataset
+from models.bert_idiom_model import *
+from models.bert_idiom_binary_model import *
 import numpy as np
 import configparser
 import os

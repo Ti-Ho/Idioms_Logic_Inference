@@ -11,8 +11,8 @@ BERT模型推断 多分类
 输出：多分类各自的概率
 """
 
-from IdiomBertModel.dataset.InferenceDataset import InferenceDataset
-from IdiomBertModel.models.bert_idiom_model import *
+from dataset.InferenceDataset import InferenceDataset
+from models.bert_idiom_model import *
 import numpy as np
 import configparser
 import os

@@ -11,8 +11,8 @@ BERT模型推断 二分类
 输出：是某关系的概率
 """
 
-from IdiomBertModel.dataset.InferenceDataset import InferenceDataset
-from IdiomBertModel.models.bert_idiom_binary_model import *
+from dataset.InferenceDataset import InferenceDataset
+from models.bert_idiom_binary_model import *
 import numpy as np
 import configparser
 import os

@@ -11,8 +11,8 @@ BERT模型训练 二分类
 from sklearn import metrics
 from torch.utils.data import DataLoader
 
-from IdiomBertModel.dataset.IdiomDataset import IdiomDataset
-from IdiomBertModel.models.bert_idiom_binary_model import *
+from dataset.IdiomDataset import IdiomDataset
+from models.bert_idiom_binary_model import *
 
 import tqdm
 import pandas as pd

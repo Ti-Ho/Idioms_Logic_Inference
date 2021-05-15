@@ -9,7 +9,7 @@
 二分类成语推断模型
 """
 
-from IdiomBertModel.models.bert_model import *
+from models.bert_model import *
 
 
 class Bert_Idiom_Analysis_v2(nn.Module):
