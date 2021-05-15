@@ -1,11 +1,11 @@
 <template>
     <div style="margin-left: 10px; margin-right: 10px; height: 100%">
         <!--     form 表单      -->
-        <el-form ref="form" :model="form" label-width="120px" label-position="left">
+        <el-form ref="form" :model="form" label-width="120px" label-position="left" class="demo-ruleForm" :rules="rules">
             <el-row><div class="step-font">步骤1: 输入成语</div></el-row>
             <el-row>
                 <el-col :span="8">
-                    <el-form-item label="成语1">
+                    <el-form-item label="成语1" prop="idiom1">
                         <el-input placeholder="请输入成语1" v-model="form.idiom1"></el-input>
                     </el-form-item>
                 </el-col>
@@ -14,7 +14,7 @@
                 </el-col>
                 <el-col :span="2" v-if="!hasRes" style="margin-left: 10px; margin-right: 20px;"><div class="grid-content"></div></el-col>
                 <el-col :span="8">
-                    <el-form-item label="成语2">
+                    <el-form-item label="成语2" prop="idiom2">
                         <el-input placeholder="请输入成语2" v-model="form.idiom2"></el-input>
                     </el-form-item>
                 </el-col>
@@ -50,7 +50,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item>
-                        <el-button type="primary" @click="onSubmit">开始推断</el-button>
+                        <el-button type="primary" @click="onSubmit('form')">开始推断</el-button>
                         <el-button @click="clear">取消</el-button>
                     </el-form-item>
                 </el-col>
@@ -99,6 +99,14 @@ export default {
         model_type: '二分类模型',
         ifPool: '使用mean max pool输出层',
       },
+      rules: {
+        idiom1: [
+            { required: true, message: '请输入成语1', trigger: 'blur'}
+        ],
+        idiom2: [
+            { required: true, message: '请输入成语2', trigger: 'blur'}
+        ]
+      },
       hasRes: false,
       p0: 0.01,
       p1: 0.02,
@@ -111,40 +119,60 @@ export default {
   },
   methods: {
     // 点击开始推断后的操作
-    async onSubmit() {
-        const params = qs.stringify({
-            idiom1: this.form.idiom1,
-            idiom2: this.form.idiom2,
-            model_type: (this.form.model_type === "二分类模型") ? 1 : 0,
-            ifPool: (this.form.ifPool === "使用mean max pool输出层") ? 1: 0
-        });
-        var allData = null;
-        await this.$http.post('/get_res', params)
-        .then(function (response) {
-            // console.log(response.data);
-            allData = response.data
-        })
-        .catch(function (error) {
-           console.log(error);
-        });
-        this.resData = allData;
-        if (this.resData.status === 0) {
-            this.hasRes = true;
-            if (this.form.model_type === '二分类模型') {
-                this.p1 = this.resData.predictions[0];
-                this.p2 = this.resData.predictions[1];
+    onSubmit(formName) {
+        this.$refs[formName].validate((valid) => {
+            if (valid) {
+                alert('提交!');
+                this.PostFunc();
             } else {
-                this.p0 = this.resData.predictions[0];
-                this.p1 = this.resData.predictions[1];
-                this.p2 = this.resData.predictions[2];
+                console.log('error submit!!');
+                alert('输入错误！');
+                return false;
             }
-            this.explanation1 = this.resData.explanation1;
-            this.explanation2 = this.resData.explanation2;
-            this.example1 = this.resData.example1;
-            this.example2 = this.resData.example2;
-        }
-        console.log(this.resData.predictions);
+        });
     },
+     async PostFunc() {
+         const params = qs.stringify({
+             idiom1: this.form.idiom1,
+             idiom2: this.form.idiom2,
+             model_type: (this.form.model_type === "二分类模型") ? 1 : 0,
+             ifPool: (this.form.ifPool === "使用mean max pool输出层") ? 1 : 0
+         });
+         var allData = null;
+         await this.$http.post('/get_res', params)
+             .then(function (response) {
+                 // console.log(response.data);
+                 allData = response.data
+             })
+             .catch(function (error) {
+                 console.log(error);
+             });
+         this.resData = allData;
+         if (this.resData.status === 0) {
+             this.hasRes = true;
+             if (this.form.model_type === '二分类模型') {
+                 this.p1 = this.resData.predictions[0];
+                 this.p2 = this.resData.predictions[1];
+             } else {
+                 this.p0 = this.resData.predictions[0];
+                 this.p1 = this.resData.predictions[1];
+                 this.p2 = this.resData.predictions[2];
+             }
+             this.explanation1 = this.resData.explanation1;
+             this.explanation2 = this.resData.explanation2;
+             this.example1 = this.resData.example1;
+             this.example2 = this.resData.example2;
+         } else if (this.resData.status === 1) {
+             this.$alert(this.form.idiom1 + '不是成语', '错误提示', {
+                 confirmButtonText: '确定',
+             })
+         } else {
+             this.$alert(this.form.idiom2 + '不是成语', '错误提示', {
+                 confirmButtonText: '确定',
+             })
+         }
+         console.log(this.resData.predictions);
+     },
     clear() {
       this.form.idiom1 = '';
       this.form.idiom2 = '';
