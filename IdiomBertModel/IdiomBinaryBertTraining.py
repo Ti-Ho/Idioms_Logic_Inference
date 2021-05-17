@@ -260,7 +260,10 @@ class IdiomTrainer:
             os.mkdir(state_dict_dir)
         save_path = state_dict_dir + "/" + file_path + ".epoch.{}".format(str(epoch))
         model.to("cpu")
+        # 若在本机训练：torch.__verison__ = 1.2.0
         torch.save({"model_state_dict": model.state_dict()}, save_path)
+        # 若在服务器训练：torch.__version__ = 1.8.1
+        # torch.save({"model_state_dict": model.state_dict()}, save_path, _use_new_zipfile_serialization=False)
         print("{} saved!".format(save_path))
         model.to(self.device)
 
@@ -284,7 +287,7 @@ if __name__ == "__main__":
 
     start_epoch = 0
     train_epoches = 9999
-    trainer, dynamic_lr = init_trainer(dynamic_lr=1e-04, batch_size=24)
+    trainer, dynamic_lr = init_trainer(dynamic_lr=1e-05, batch_size=24)
 
     all_auc = []
     threshold = 999

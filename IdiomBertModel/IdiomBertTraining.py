@@ -239,6 +239,8 @@ class IdiomTrainer:
         save_path = state_dict_dir + "/" + file_path + ".epoch.{}".format(str(epoch))
         model.to("cpu")
         torch.save({"model_state_dict": model.state_dict()}, save_path)
+        # 若在服务器训练：
+        # torch.save({"model_state_dict": model.state_dict()}, save_path, _use_new_zipfile_serialization=False)
         print("{} saved!".format(save_path))
         model.to(self.device)
 
