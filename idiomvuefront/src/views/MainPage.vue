@@ -30,10 +30,6 @@
               <i class="el-icon-search"></i>
               <span slot="title">成语逻辑推断</span>
             </el-menu-item>
-<!--            <el-menu-item index="2">-->
-<!--              <i class="el-icon-monitor"></i>-->
-<!--              <span slot="title">模型对比</span>-->
-<!--            </el-menu-item>-->
             <el-submenu index="2">
               <template slot="title">
                 <i class="el-icon-picture-outline"></i>
@@ -54,8 +50,10 @@
         </el-aside>
         <el-main>
           <FormComponent v-if="this.componentId==='1'"></FormComponent>
-          <modelCompareComponent v-else-if="this.componentId==='2-1'"></modelCompareComponent>
-          <modelStructureComponent v-else></modelStructureComponent>
+          <modelCompareLoss v-else-if="this.componentId==='2-1'"></modelCompareLoss>
+          <modelCompareAcc v-else-if="this.componentId==='2-2'"></modelCompareAcc>
+          <multiClsCompareLoss v-else-if="this.componentId==='2-3'"></multiClsCompareLoss>
+          <multiClsCompareAcc v-else-if="this.componentId==='2-4'"></multiClsCompareAcc>
         </el-main>
       </el-container>
     </el-container>
@@ -64,14 +62,18 @@
 
 <script>
 import FormComponent from "@/components/FormComponent";
-import modelCompareComponent from "@/components/modelCompareComponent";
-import modelStructureComponent from "@/components/modelStructureComponent";
+import modelCompareLoss from "@/components/modelCompareLoss";
+import modelCompareAcc from "@/components/modelCompareAcc";
+import multiClsCompareLoss from "@/components/multiClsCompareLoss";
+import multiClsCompareAcc from "@/components/multiClsCompareAcc";
 export default {
   name: "MainPage",
   components: {
     FormComponent,
-    modelCompareComponent,
-    modelStructureComponent,
+    modelCompareLoss,
+    modelCompareAcc,
+    multiClsCompareLoss,
+    multiClsCompareAcc,
   },
   data() {
     return {
