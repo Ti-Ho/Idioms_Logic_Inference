@@ -19,14 +19,11 @@ from sklearn.utils import shuffle
 
 
 class IdiomDataset(Dataset):
-    def __init__(self, corpus_path, word2idx, max_seq_len, cls_type=0):
+    def __init__(self, corpus_path, word2idx, max_seq_len):
         """
         :param corpus_path: 语料的路径
         :param word2idx:    word2idx
         :param max_seq_len: 句子最长的长度
-        :param cls_type:    若cls_type=0 表示多分类 label = 0 无逻辑关系, 1 并列关系, 2 转折关系
-                            若cls_type=1 表示二分类 label = 0 非并列关系, 1 并列关系
-                            若cls_type=2 表示二分类 label = 0 非转折关系, 1 转折关系
         """
         self.word2idx = word2idx
         # define max length
@@ -40,7 +37,6 @@ class IdiomDataset(Dataset):
         self.sep_index = 3
         self.mask_index = 4
         self.num_index = 5
-        self.cls_type = cls_type
 
         # 加载语料
         file = pd.read_csv(self.corpus_path)
@@ -53,11 +49,6 @@ class IdiomDataset(Dataset):
 
     def __getitem__(self, item):
         sentence1, sentence2, label = self.get_text_and_label(item)
-        # 判断需要的是二分类还是多分类数据, 处理数据
-        if self.cls_type == 1:
-            label = 1 if label == 1 else 0
-        if self.cls_type == 2:
-            label = 1 if label == 2 else 0
         text_input1 = self.tokenize_char(sentence1)
         text_input2 = self.tokenize_char(sentence2)
 

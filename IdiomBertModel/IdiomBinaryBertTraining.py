@@ -53,10 +53,9 @@ class IdiomTrainer:
         # 将模型发送到计算设备(GPU或CPU)
         self.bert_model.to(self.device)
         # 声明训练数据集
-        train_dataset = IdiomDataset(corpus_path=self.config["train_corpus_path"],
+        train_dataset = IdiomDataset(corpus_path=self.config["bi_train_corpus_path"] if self.cls_type == 1 else self.config["bi_train_corpus_path2"],
                                      word2idx=self.word2idx,
-                                     max_seq_len=self.max_seq_len,
-                                     cls_type=self.cls_type                                     # cls_type = 1 表示训练并列关系二分类模型 2表示训练转折关系二分类模型
+                                     max_seq_len=self.max_seq_len,                                     # cls_type = 1 表示训练并列关系二分类模型 2表示训练转折关系二分类模型
                                      )
         self.train_dataloader = DataLoader(train_dataset,
                                            batch_size=self.batch_size,
@@ -64,10 +63,9 @@ class IdiomTrainer:
                                            collate_fn=lambda x: x  # 这里为了动态padding
                                            )
         # 声明测试数据集
-        test_dataset = IdiomDataset(corpus_path=self.config["test_corpus_path"],
+        test_dataset = IdiomDataset(corpus_path=self.config["bi_test_corpus_path"] if self.cls_type == 1 else self.config["bi_test_corpus_path2"],
                                     word2idx=self.word2idx,
                                     max_seq_len=self.max_seq_len,
-                                    cls_type=self.cls_type
                                     )
         self.test_dataloader = DataLoader(test_dataset,
                                           batch_size=self.batch_size,
