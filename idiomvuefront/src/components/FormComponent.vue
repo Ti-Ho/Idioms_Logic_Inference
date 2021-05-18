@@ -27,7 +27,7 @@
             <el-row>
                 <el-col :span="8">
                     <el-form-item label="选择模型">
-                        <el-radio-group v-model="form.model_type">
+                        <el-radio-group v-model="form.model_type" @change="radioChange">
                             <el-radio label="二分类模型" border></el-radio>
                             <el-radio label="多分类模型" border></el-radio>
                         </el-radio-group>
@@ -36,7 +36,7 @@
                 <el-col :span="1"><div class="grid-content"></div></el-col>
                 <el-col :span="11">
                     <el-form-item label="选择输出层结构">
-                        <el-radio-group v-model="form.ifPool">
+                        <el-radio-group v-model="form.ifPool" @change="radioChange">
                             <el-radio label="使用mean max pool输出层" border></el-radio>
                             <el-radio label="使用CLS向量推断" border></el-radio>
                         </el-radio-group>
@@ -120,6 +120,7 @@ export default {
   methods: {
     // 点击开始推断后的操作
     onSubmit(formName) {
+        this.hasRes = false;
         this.$refs[formName].validate((valid) => {
             if (valid) {
                 alert('提交!');
@@ -131,48 +132,48 @@ export default {
             }
         });
     },
-     async PostFunc() {
-         const params = qs.stringify({
-             idiom1: this.form.idiom1,
-             idiom2: this.form.idiom2,
-             model_type: (this.form.model_type === "二分类模型") ? 1 : 0,
-             ifPool: (this.form.ifPool === "使用mean max pool输出层") ? 1 : 0
+    async PostFunc() {
+     const params = qs.stringify({
+         idiom1: this.form.idiom1,
+         idiom2: this.form.idiom2,
+         model_type: (this.form.model_type === "二分类模型") ? 1 : 0,
+         ifPool: (this.form.ifPool === "使用mean max pool输出层") ? 1 : 0
+     });
+     var allData = null;
+     await this.$http.post('/get_res', params)
+         .then(function (response) {
+             // console.log(response.data);
+             allData = response.data
+         })
+         .catch(function (error) {
+             console.log(error);
          });
-         var allData = null;
-         await this.$http.post('/get_res', params)
-             .then(function (response) {
-                 // console.log(response.data);
-                 allData = response.data
-             })
-             .catch(function (error) {
-                 console.log(error);
-             });
-         this.resData = allData;
-         if (this.resData.status === 0) {
-             this.hasRes = true;
-             if (this.form.model_type === '二分类模型') {
-                 this.p1 = this.resData.predictions[0];
-                 this.p2 = this.resData.predictions[1];
-             } else {
-                 this.p0 = this.resData.predictions[0];
-                 this.p1 = this.resData.predictions[1];
-                 this.p2 = this.resData.predictions[2];
-             }
-             this.explanation1 = this.resData.explanation1;
-             this.explanation2 = this.resData.explanation2;
-             this.example1 = this.resData.example1;
-             this.example2 = this.resData.example2;
-         } else if (this.resData.status === 1) {
-             this.$alert(this.form.idiom1 + '不是成语', '错误提示', {
-                 confirmButtonText: '确定',
-             })
+     this.resData = allData;
+     if (this.resData.status === 0) {
+         this.hasRes = true;
+         if (this.form.model_type === '二分类模型') {
+             this.p1 = this.resData.predictions[0];
+             this.p2 = this.resData.predictions[1];
          } else {
-             this.$alert(this.form.idiom2 + '不是成语', '错误提示', {
-                 confirmButtonText: '确定',
-             })
+             this.p0 = this.resData.predictions[0];
+             this.p1 = this.resData.predictions[1];
+             this.p2 = this.resData.predictions[2];
          }
-         console.log(this.resData.predictions);
-     },
+         this.explanation1 = this.resData.explanation1;
+         this.explanation2 = this.resData.explanation2;
+         this.example1 = this.resData.example1;
+         this.example2 = this.resData.example2;
+     } else if (this.resData.status === 1) {
+         this.$alert(this.form.idiom1 + '不是成语', '错误提示', {
+             confirmButtonText: '确定',
+         })
+     } else {
+         this.$alert(this.form.idiom2 + '不是成语', '错误提示', {
+             confirmButtonText: '确定',
+         })
+     }
+     console.log(this.resData.predictions);
+    },
     clear() {
       this.form.idiom1 = '';
       this.form.idiom2 = '';
@@ -189,6 +190,10 @@ export default {
         confirmButtonText: '确定',
         dangerouslyUseHTMLString: true
       });
+    },
+    radioChange() {
+        console.log('radio change');
+        this.hasRes = false;
     }
   }
 }

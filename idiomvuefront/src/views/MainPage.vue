@@ -30,31 +30,31 @@
               <i class="el-icon-search"></i>
               <span slot="title">成语逻辑推断</span>
             </el-menu-item>
-            <el-menu-item index="2">
-              <i class="el-icon-monitor"></i>
-              <span slot="title">模型对比</span>
-            </el-menu-item>
-            <el-submenu index="3">
+<!--            <el-menu-item index="2">-->
+<!--              <i class="el-icon-monitor"></i>-->
+<!--              <span slot="title">模型对比</span>-->
+<!--            </el-menu-item>-->
+            <el-submenu index="2">
               <template slot="title">
                 <i class="el-icon-picture-outline"></i>
-                <span>模型结构</span>
+                <span>模型对比</span>
               </template>
               <el-menu-item-group>
                 <template slot="title">二分类</template>
-                <el-menu-item index="3-1" style="font-size: x-small">二分类 MeanMaxPool</el-menu-item>
-                <el-menu-item index="3-2" style="font-size: x-small">二分类 CLS分类</el-menu-item>
+                <el-menu-item index="2-1" style="font-size: x-small">二分类模型loss对比</el-menu-item>
+                <el-menu-item index="2-2" style="font-size: x-small">二分类模型准确率对比</el-menu-item>
               </el-menu-item-group>
               <el-menu-item-group>
                 <template slot="title">多分类</template>
-                <el-menu-item index="3-3" style="font-size: x-small">多分类 MeanMaxPool</el-menu-item>
-                <el-menu-item index="3-4" style="font-size: x-small">多分类 CLS分类</el-menu-item>
+                <el-menu-item index="2-3" style="font-size: x-small">多分类模型loss对比</el-menu-item>
+                <el-menu-item index="2-4" style="font-size: x-small">多分类模型准确率对比</el-menu-item>
               </el-menu-item-group>
             </el-submenu>
           </el-menu>
         </el-aside>
         <el-main>
           <FormComponent v-if="this.componentId==='1'"></FormComponent>
-          <modelCompareComponent v-else-if="this.componentId==='2'"></modelCompareComponent>
+          <modelCompareComponent v-else-if="this.componentId==='2-1'"></modelCompareComponent>
           <modelStructureComponent v-else></modelStructureComponent>
         </el-main>
       </el-container>
