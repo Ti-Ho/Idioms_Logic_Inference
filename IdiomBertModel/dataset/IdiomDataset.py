@@ -77,6 +77,7 @@ class IdiomDataset(Dataset):
             sentence2 = explanation2 + str(example2)
 
         return sentence1, sentence2, label
+        # return explanation1, explanation2, label
 
     def tokenize_char(self, segments):
         return [self.word2idx.get(char, self.unk_index) for char in segments]
