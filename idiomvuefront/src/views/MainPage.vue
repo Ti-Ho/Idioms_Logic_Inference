@@ -3,7 +3,7 @@
     <el-container>
       <el-header>
         <div>
-          汉语成语逻辑关系推断可视化面板
+          汉语成语逻辑关系推断系统设计与实现
         </div>
         <a href="https://github.com/Ti-Ho/Idioms_Logic_Inference">
           <div class="head-right">
