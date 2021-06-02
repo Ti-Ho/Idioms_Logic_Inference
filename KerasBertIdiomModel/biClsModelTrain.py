@@ -96,7 +96,7 @@ def create_cls_model():
 
     x = bert_model([x1_in, x2_in])
     cls_layer = Lambda(lambda x: x[:, 0])(x)    # 取出[CLS]对应的向量用来做分类
-    p = Dense(1, activation='sigmoid')(cls_layer)     # 多分类
+    p = Dense(2, activation='softmax')(cls_layer)     # 多分类
 
     model = Model([x1_in, x2_in], p)
     model.compile(
@@ -127,7 +127,7 @@ def create_mmp_model():
     max_pool = Lambda(myMax)(x)
     pool = concatenate([mean_pool, max_pool], axis=1)
     tmp = Dense(int(mean_pool.shape[1]))(pool)
-    p = Dense(1, activation="sigmoid")(tmp)
+    p = Dense(2, activation="softmax")(tmp)
     model = Model([x1_in, x2_in], p)
     model.compile(
         loss='categorical_crossentropy',
@@ -205,7 +205,8 @@ if __name__ == '__main__':
         validation_data=test_D.__iter__(),
         validation_steps=len(test_D)
     )
-
+    print(">>>>>>>>>>>>history>>>>>>>>>>")
+    print(history)
     print("finish model training!")
 
     # 模型保存
