@@ -140,7 +140,7 @@ def create_mmp_model(num_labels):
 
 
 if __name__ == '__main__':
-    model_type = 0  # 控制训练模型 1 - mean max pool; 0 - CLS
+    ifPool = 0  # 控制训练模型 1 - mean max pool; 0 - CLS
     # 数据处理, 读取训练集和测试集
     print("begin data processing...")
     train_df = pd.read_csv("corpus/IdiomData_train.csv").fillna(value="")
@@ -187,7 +187,7 @@ if __name__ == '__main__':
     print("finish data processing!")
 
     # 模型训练
-    if model_type == 0:  # 1. 训练输出层为cls的模型
+    if ifPool == 0:  # 1. 训练输出层为cls的模型
         model = create_cls_model(len(labels))
     else:                # 2. 训练输出层为mean max pool的模型
         model = create_mmp_model(len(labels))
@@ -206,7 +206,7 @@ if __name__ == '__main__':
     print("finish model training!")
 
     # 模型保存
-    if model_type == 0:
+    if ifPool == 0:
         model.save('bert_model/multi_cls_bert.h5')
     else:
         model.save('bert_model/multi_mmp_bert.h5')

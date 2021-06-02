@@ -5,7 +5,6 @@
 # @File : multiClsModelTrain.py
 # @Software: PyCharm
 
-import json
 import codecs
 import pandas as pd
 import numpy as np
@@ -21,6 +20,8 @@ config_path = './chinese_L-12_H-768_A-12/bert_config.json'
 checkpoint_path = './chinese_L-12_H-768_A-12/bert_model.ckpt'
 dict_path = './chinese_L-12_H-768_A-12/vocab.txt'
 
+ifPool = 0      # 控制训练模型 1 - mean max pool; 0 - CLS
+syn_or_ant = 0  # 控制训练并列关系还是转折关系模型 0 - 并列关系; 0 - 转折关系
 
 token_dict = {}
 with codecs.open(dict_path, 'r', 'utf-8') as reader:
@@ -41,7 +42,6 @@ class OurTokenizer(Tokenizer):
 
 
 tokenizer = OurTokenizer(token_dict)
-
 
 def seq_padding(X, padding=0):
     L = [len(x) for x in X]
@@ -85,7 +85,7 @@ class DataGenerator:
 
 
 # 构建模型
-def create_cls_model(num_labels):
+def create_cls_model():
     bert_model = load_trained_model_from_checkpoint(config_path, checkpoint_path, seq_len=None)
 
     for layer in bert_model.layers:
@@ -96,7 +96,7 @@ def create_cls_model(num_labels):
 
     x = bert_model([x1_in, x2_in])
     cls_layer = Lambda(lambda x: x[:, 0])(x)    # 取出[CLS]对应的向量用来做分类
-    p = Dense(num_labels, activation='softmax')(cls_layer)     # 多分类
+    p = Dense(1, activation='sigmoid')(cls_layer)     # 多分类
 
     model = Model([x1_in, x2_in], p)
     model.compile(
@@ -113,7 +113,7 @@ def myMean(x):
 def myMax(x):
     return tf.reduce_max(x, axis=1)
 
-def create_mmp_model(num_labels):
+def create_mmp_model():
     bert_model = load_trained_model_from_checkpoint(config_path, checkpoint_path, seq_len=None)
 
     for layer in bert_model.layers:
@@ -127,7 +127,7 @@ def create_mmp_model(num_labels):
     max_pool = Lambda(myMax)(x)
     pool = concatenate([mean_pool, max_pool], axis=1)
     tmp = Dense(int(mean_pool.shape[1]))(pool)
-    p = Dense(num_labels, activation="softmax")(tmp)
+    p = Dense(1, activation="sigmoid")(tmp)
     model = Model([x1_in, x2_in], p)
     model.compile(
         loss='categorical_crossentropy',
@@ -140,13 +140,16 @@ def create_mmp_model(num_labels):
 
 
 if __name__ == '__main__':
-    model_type = 0  # 控制训练模型 1 - mean max pool; 0 - CLS
     # 数据处理, 读取训练集和测试集
     print("begin data processing...")
-    train_df = pd.read_csv("corpus/IdiomData_train.csv").fillna(value="")
-    test_df = pd.read_csv("corpus/IdiomData_test.csv").fillna(value="")
+    if syn_or_ant == 0:
+        train_df = pd.read_csv("corpus/BinaryClsData1/BiIdiomData_train.csv").fillna(value="")
+        test_df = pd.read_csv("corpus/BinaryClsData1/BiIdiomData_test.csv").fillna(value="")
+    else:
+        train_df = pd.read_csv("corpus/BinaryClsData2/BiIdiomData_train.csv").fillna(value="")
+        test_df = pd.read_csv("corpus/BinaryClsData2/BiIdiomData_test.csv").fillna(value="")
 
-    labels = [0, 1, 2]
+    labels = [0, 1]
 
     train_data = []
     test_data = []
@@ -187,10 +190,10 @@ if __name__ == '__main__':
     print("finish data processing!")
 
     # 模型训练
-    if model_type == 0:  # 1. 训练输出层为cls的模型
-        model = create_cls_model(len(labels))
+    if ifPool == 0:      # 1. 训练输出层为cls的模型
+        model = create_cls_model()
     else:                # 2. 训练输出层为mean max pool的模型
-        model = create_mmp_model(len(labels))
+        model = create_mmp_model()
     train_D = DataGenerator(train_data)
     test_D = DataGenerator(test_data)
 
@@ -206,10 +209,16 @@ if __name__ == '__main__':
     print("finish model training!")
 
     # 模型保存
-    if model_type == 0:
-        model.save('bert_model/multi_cls_bert.h5')
+    if syn_or_ant == 0:
+        if ifPool == 0:
+            model.save('bert_model/bi_syn_cls_bert.h5')
+        else:
+            model.save('bert_model/bi_syn_mmp_bert.h5')
     else:
-        model.save('bert_model/multi_mmp_bert.h5')
+        if ifPool == 0:
+            model.save('bert_model/bi_ant_cls_bert.h5')
+        else:
+            model.save('bert_model/bi_ant_mmp_bert.h5')
     print("Model saved!")
 
     result = model.evaluate_generator(test_D.__iter__(), steps=len(test_D))
