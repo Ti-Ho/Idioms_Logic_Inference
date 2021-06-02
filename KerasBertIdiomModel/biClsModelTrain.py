@@ -206,7 +206,7 @@ if __name__ == '__main__':
         validation_steps=len(test_D)
     )
     print(">>>>>>>>>>>>history>>>>>>>>>>")
-    print(history)
+    print(history.history)
     print("finish model training!")
 
     # 模型保存
