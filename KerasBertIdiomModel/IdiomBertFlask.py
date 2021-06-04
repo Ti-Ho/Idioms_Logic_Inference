@@ -24,7 +24,6 @@ CORS(app, supports_credentials=True)
 
 # 加载训练好的模型
 ifPool = 0      # 控制加载模型 1 - mean max pool; 0 - CLS
-syn_or_ant = 0  # 控制加载并列关系还是转折关系模型 0 - 并列关系; 0 - 转折关系
 model_type = 1  # 控制加载模型为 0 - 多分类 1 - 二分类
 
 tokenizer = OurTokenizer(token_dict)
@@ -86,23 +85,28 @@ def idiom_api():
         X2 = x2 + [0] * (maxlen - len(x2)) if len(x2) < maxlen else x2
 
         # 模型预测并输出预测结果
+        print("######加载模型中######")
         if model_type == 0:
             if ifPool == 0:
-                predictions = multi_cls_model.predict([[X1], [X2]])
+                model = load_model("bert_model/multi_cls_bert.h5", custom_objects=get_custom_objects())
+                predictions = model.predict([[X1], [X2]])
             else:
-                predictions = multi_pool_model.predict([[X1], [X2]])
+                model = load_model("bert_model/multi_mmp_bert.h5", custom_objects=get_custom_objects())
+                predictions = model.predict([[X1], [X2]])
         else:
-            if syn_or_ant == 0:
-                if ifPool == 0:
-                    predictions = bi_syn_cls_model.predict([[X1], [X2]])
-                else:
-                    predictions = bi_syn_pool_model.predict([[X1], [X2]])
+            if ifPool == 0:
+                model = load_model("bert_model/bi_syn_cls_bert.h5", custom_objects=get_custom_objects())
+                model2 = load_model("bert_model/bi_ant_cls_bert.h5", custom_objects=get_custom_objects())
+                predictions = model.predict([[X1], [X2]])
+                predicitons2 = model2.predict([[X1], [X2]])
             else:
-                if ifPool == 0:
-                    predictions = bi_ant_cls_model.predict([[X1], [X2]])
-                else:
-                    predictions = bi_ant_pool_model.predict([[X1], [X2]])
+                model = load_model("bert_model/bi_syn_mmp_bert.h5", custom_objects=get_custom_objects())
+                predictions = model.predict([[X1], [X2]])
+                model2 = load_model("bert_model/bi_ant_mmp_bert.h5", custom_objects=get_custom_objects())
+                predictions2 = model.predict([[X1], [X2]])
+        print("######加载模型完毕######")
 
+        predictions = predictions.tolist()
         return jsonify({
             "status": 0,
             "predictions": predictions,
@@ -114,15 +118,6 @@ def idiom_api():
 
 
 if __name__ == '__main__':
-    print("######加载模型中######")
-    multi_cls_model = load_model("bert_model/multi_cls_bert.h5", custom_objects=get_custom_objects())
-    multi_pool_model = load_model("bert_model/multi_mmp_bert.h5", custom_objects=get_custom_objects())
-    bi_syn_cls_model = load_model("bert_model/bi_syn_cls_bert.h5", custom_objects=get_custom_objects())
-    bi_syn_pool_model = load_model("bert_model/bi_syn_mmp_bert.h5", custom_objects=get_custom_objects())
-    bi_ant_cls_model = load_model("bert_model/bi_ant_cls_bert.h5", custom_objects=get_custom_objects())
-    bi_ant_pool_model = load_model("bert_model/bi_ant_mmp_bert.h5", custom_objects=get_custom_objects())
-    print("######加载模型完毕######")
-
     print("######加载新华字典数据集######")
     idiomDict = {}
     # 读取idiom.json中的数据 重构f
