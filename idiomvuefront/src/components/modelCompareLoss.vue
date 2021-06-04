@@ -1,7 +1,7 @@
 <template>
   <div style="margin-left: 10px; margin-right: 10px; height: 100%">
     <div class="line-div">
-      <div class="com-chart" ref="lossLineChart_ref"></div>
+      <div class="com-chart" ref="lossBarChart_ref"></div>
     </div>
   </div>
 </template>
@@ -12,51 +12,13 @@ export default {
   data() {
     return {
       chartInstance: null,
-      lineData: {
-        bi_cls_1: [0.64729613, 0.61775511, 0.6008741 , 0.5901947 , 0.58196055,
-          0.57532959, 0.56951228, 0.56471507, 0.56166354, 0.55840859,
-          0.55512694, 0.55219028, 0.54941294, 0.54479514, 0.54201814,
-          0.53900393, 0.5370082 , 0.53487675, 0.53240652, 0.52948783,
-          0.5269019 , 0.52512879, 0.52188776, 0.52047193, 0.51811951,
-          0.51615512, 0.5134528 , 0.51250708, 0.50936299, 0.50654828,
-          0.50528429, 0.5024803 , 0.49975312, 0.4970441 , 0.49442894,
-          0.49176516, 0.48965056, 0.48783556, 0.48445194, 0.48169319,
-          0.47910175, 0.47739248, 0.4739073 , 0.47365182, 0.47109954,
-          0.46777835, 0.46694096, 0.46397059, 0.46159285, 0.45931753,
-          0.45754221, 0.45408059, 0.45308319, 0.4518434 , 0.4470943 ,
-          0.44574209, 0.4434617 , 0.44022671, 0.43825774, 0.4361527 ,
-          0.43287012, 0.43583576, 0.43222966, 0.42928553, 0.42667941,
-          0.42390635, 0.42032856, 0.42037912, 0.41763399, 0.41343184,
-          0.41232355, 0.40982616, 0.40828567, 0.40532501, 0.40387933,
-          0.40328759, 0.40268033, 0.40097251, 0.3993332 , 0.39677729,
-          0.39376568, 0.39144466, 0.38842958, 0.39221521, 0.39231244,
-          0.39306183, 0.39359578, 0.39311097, 0.39275081, 0.39309319,
-          0.39233248, 0.39161386],
-        bi_cls_2: [0.5892091 , 0.50806731, 0.4709116 , 0.44904792, 0.43413209,
-          0.42356238, 0.41469838, 0.40580927, 0.3982141 , 0.39276233,
-          0.38494388, 0.38060547, 0.37590291, 0.37135391, 0.36729915,
-          0.36405196, 0.36153667, 0.35864277, 0.35542258, 0.3519623 ,
-          0.34923034, 0.34541976, 0.34376638, 0.34170409, 0.34001754,
-          0.33802912, 0.33685786, 0.33552305, 0.33008003, 0.32903739,
-          0.32580292, 0.32403203, 0.32435314, 0.320687  , 0.31760502,
-          0.31508068, 0.31798465, 0.31977152, 0.31679803, 0.31592297,
-          0.31642449, 0.3141349 , 0.31647687, 0.31416304, 0.31391231],
-        bi_pool_1: [0.63221423, 0.60168064, 0.58524948, 0.56939131, 0.5560894 ,
-          0.54292523, 0.531994  , 0.52201878, 0.51297014, 0.50375121,
-          0.4959555 , 0.49006466, 0.48237702, 0.4783781 , 0.47079541,
-          0.46466736, 0.45887049, 0.45486361, 0.45068509, 0.4466457 ,
-          0.44248958, 0.43801521, 0.43498213, 0.43361957, 0.42974315,
-          0.42699052, 0.4260619 , 0.42553409, 0.42487199, 0.42200445],
-        bi_pool_2:  [0.56793225, 0.50020881, 0.46511205, 0.4474978 , 0.43350966,
-          0.42331337, 0.41404876, 0.40591682, 0.39855184, 0.39107283,
-          0.38541023, 0.379793  , 0.37558753, 0.37073833, 0.36612601,
-          0.36363164, 0.35982588, 0.35429839, 0.35188451, 0.34886144,
-          0.34747171, 0.34355905, 0.34141888, 0.33948157, 0.33562925,
-          0.33343718, 0.33043288, 0.3284135 , 0.3261017 , 0.32232972,
-          0.3207574 , 0.31759427, 0.31471969, 0.31323307, 0.30908201,
-          0.30949399, 0.30666478, 0.3075253 , 0.30647904, 0.30607153,
-          0.30712741, 0.30365083, 0.3047078 , 0.30460136, 0.30505361,
-          0.30280566],
+      barChartData: {
+        multi_cls: 0.0038,
+        multi_mmp: 0.000067,
+        bi_syn_cls: 0.005738,
+        bi_syn_mmp: 0.007744,
+        bi_ant_cls: 0.000805,
+        bi_ant_mmp: 0.010322
       }
     }
   },
@@ -66,14 +28,11 @@ export default {
   methods : {
     // 初始化echartsInstance对象
     initChart () {
-      this.chartInstance = this.$echarts.init(this.$refs.lossLineChart_ref);
+      this.chartInstance = this.$echarts.init(this.$refs.lossBarChart_ref);
       const initOption = {
         title: {
           top: '5%',
-          text: '二分类模型Loss对比'
-        },
-        tooltip: {
-          trigger: 'axis'
+          text: '成语逻辑推断模型测试集Loss对比'
         },
         legend: {
           // data: ['二分类#CLS向量#并列关系', '二分类#CLS向量#转折关系', '二分类#MMP#并列关系', '二分类#MMP#转折关系', '多分类#CLS', '多分类#MMP']
@@ -93,41 +52,32 @@ export default {
         },
         xAxis: {
           type: 'category',
-          boundaryGap: false,
-          data: ['epoch0', 'epoch1', 'epoch2', 'epoch3', 'epoch4', 'epoch5', 'epoch6', 'epoch7',
-            'epoch8','epoch9','epoch10','epoch11','epoch12','epoch13','epoch14',
-            'epoch15','epoch16','epoch17','epoch18','epoch19','epoch20','epoch21',
-            'epoch22','epoch23','epoch24','epoch25','epoch26','epoch27','epoch28',
-            'epoch29','epoch30','epoch31','epoch32','epoch33','epoch34','epoch35',
-            'epoch36','epoch37','epoch38','epoch39','epoch40','epoch41','epoch42',
-            'epoch43','epoch44','epoch45','epoch46','epoch47','epoch48','epoch49',
-            'epoch50','epoch51','epoch52','epoch53','epoch54','epoch55','epoch56', 'epoch57']
+          data: ['多分类 CLS输出结构', '多分类 Mean Max Pool输出结构', '二分类 并列关系 CLS输出结构',
+            '二分类 并列关系 Mean Max Pool输出结构', '二分类 转折关系 CLS输出结构', '二分类 转折关系 Mean Max Pool输出结构'],
+          axisLabel: {
+            interval:0, //强制显示文字
+            show: true,
+          },
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
         },
-        series: [
-          {
-            name: '二分类#CLS#并列关系',
-            type: 'line',
-            data: this.lineData.bi_cls_1
-          },
-          {
-            name: '二分类#CLS#转折关系',
-            type: 'line',
-            data: this.lineData.bi_cls_2
-          },
-          {
-            name: '二分类#MMP#并列关系',
-            type: 'line',
-            data: this.lineData.bi_pool_1
-          },
-          {
-            name: '二分类#MMP#转折关系',
-            type: 'line',
-            data: this.lineData.bi_pool_2
+        series: [{
+          data: [{value: this.barChartData.multi_cls, itemStyle: {color: '#123456'}}, {value: this.barChartData.multi_mmp, itemStyle: {color: '#3CB371'}},
+            {value: this.barChartData.bi_syn_cls, itemStyle: {color: '#CD853F'}}, {value: this.barChartData.bi_syn_mmp, itemStyle: {color: '#FF4500'}},
+            {value: this.barChartData.bi_ant_cls, itemStyle: {color: '#FFD700'}}, {value: this.barChartData.bi_ant_mmp, itemStyle: {color: '#008B8B'}}],
+          type: 'bar',
+          showBackground: true,
+          backgroundStyle: {
+            color: 'rgba(180, 180, 180, 0.2)'
           }
-        ]
+        }],
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+            type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+          }
+        },
       };
       this.chartInstance.setOption(initOption);
     },

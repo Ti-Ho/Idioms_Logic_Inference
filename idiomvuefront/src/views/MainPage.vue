@@ -36,14 +36,13 @@
                 <span>模型对比</span>
               </template>
               <el-menu-item-group>
-                <template slot="title">二分类</template>
-                <el-menu-item index="2-1" style="font-size: x-small">二分类模型loss对比</el-menu-item>
-                <el-menu-item index="2-2" style="font-size: x-small">二分类模型准确率对比</el-menu-item>
+                <template slot="title">模型loss、准确率对比</template>
+                <el-menu-item index="2-1" style="font-size: x-small">模型测试集loss对比</el-menu-item>
+                <el-menu-item index="2-2" style="font-size: x-small">模型测试集准确率对比</el-menu-item>
               </el-menu-item-group>
               <el-menu-item-group>
-                <template slot="title">多分类</template>
-                <el-menu-item index="2-3" style="font-size: x-small">多分类模型loss对比</el-menu-item>
-                <el-menu-item index="2-4" style="font-size: x-small">多分类模型准确率对比</el-menu-item>
+                <template slot="title">模型标签分类对比</template>
+                <el-menu-item index="2-3" style="font-size: x-small">标签分类测试集准确率</el-menu-item>
               </el-menu-item-group>
             </el-submenu>
           </el-menu>
@@ -52,8 +51,7 @@
           <FormComponent v-if="this.componentId==='1'"></FormComponent>
           <modelCompareLoss v-else-if="this.componentId==='2-1'"></modelCompareLoss>
           <modelCompareAcc v-else-if="this.componentId==='2-2'"></modelCompareAcc>
-          <multiClsCompareLoss v-else-if="this.componentId==='2-3'"></multiClsCompareLoss>
-          <multiClsCompareAcc v-else-if="this.componentId==='2-4'"></multiClsCompareAcc>
+          <multiClsCompareAcc v-else-if="this.componentId==='2-3'"></multiClsCompareAcc>
         </el-main>
       </el-container>
     </el-container>
@@ -64,7 +62,6 @@
 import FormComponent from "@/components/FormComponent";
 import modelCompareLoss from "@/components/modelCompareLoss";
 import modelCompareAcc from "@/components/modelCompareAcc";
-import multiClsCompareLoss from "@/components/multiClsCompareLoss";
 import multiClsCompareAcc from "@/components/multiClsCompareAcc";
 export default {
   name: "MainPage",
@@ -72,7 +69,6 @@ export default {
     FormComponent,
     modelCompareLoss,
     modelCompareAcc,
-    multiClsCompareLoss,
     multiClsCompareAcc,
   },
   data() {

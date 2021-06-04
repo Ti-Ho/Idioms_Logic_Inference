@@ -15,7 +15,7 @@ from sklearn.metrics import classification_report
 from biClsModelTrain import token_dict, OurTokenizer
 
 ifPool = 1      # 控制训练模型 1 - mean max pool; 0 - CLS
-syn_or_ant = 0  # 控制训练并列关系还是转折关系模型 0 - 并列关系; 1 - 转折关系
+syn_or_ant = 1  # 控制训练并列关系还是转折关系模型 0 - 并列关系; 1 - 转折关系
 maxlen = 300
 # 加载训练好的模型
 if syn_or_ant == 0:

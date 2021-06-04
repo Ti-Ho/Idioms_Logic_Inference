@@ -1,7 +1,7 @@
 <template>
  <div style="margin-left: 10px; margin-right: 10px; height: 100%">
   <div class="line-div">
-   <div class="com-chart" ref="accLineChart_ref"></div>
+   <div class="com-chart" ref="accBarChart_ref"></div>
   </div>
  </div>
 </template>
@@ -12,51 +12,13 @@ export default {
  data() {
   return {
    chartInstance: null,
-   lineData: {
-    bi_cls_1: [0.67380013, 0.7201377 , 0.74115806, 0.75225745, 0.76082276,
-     0.76735951, 0.77282326, 0.7772873 , 0.78032598, 0.78317343,
-     0.78624323, 0.789058  , 0.79167217, 0.79617728, 0.79884919,
-     0.80162254, 0.80338569, 0.80531358, 0.80752947, 0.8102069 ,
-     0.81249714, 0.81391529, 0.81650931, 0.81791364, 0.81989999,
-     0.82132107, 0.82382752, 0.82464707, 0.8271894 , 0.82919092,
-     0.8304251 , 0.83255254, 0.83470029, 0.83678183, 0.83858703,
-     0.8406554 , 0.84227773, 0.84366575, 0.84617197, 0.84815259,
-     0.84997436, 0.85115477, 0.85366845, 0.85399447, 0.85565296,
-     0.85792767, 0.85848223, 0.86060556, 0.86224076, 0.86367079,
-     0.86492833, 0.86722621, 0.86781941, 0.86864749, 0.87166781,
-     0.87260552, 0.87410609, 0.8759274 , 0.87709226, 0.8784083 ,
-     0.88043495, 0.87871293, 0.88088548, 0.88257436, 0.88412343,
-     0.88565073, 0.88768663, 0.88776554, 0.88924521, 0.8916906 ,
-     0.8921864 , 0.89355303, 0.89441518, 0.89595054, 0.89665658,
-     0.89702089, 0.89730127, 0.89820309, 0.89924663, 0.90038984,
-     0.90177984, 0.90298747, 0.90447864, 0.90259123, 0.90268586,
-     0.90223479, 0.90195281, 0.90228567, 0.90242501, 0.90219313,
-     0.90267307, 0.90303757],
-    bi_cls_2: [0.74894043, 0.82825238, 0.85621578, 0.87054235, 0.87991515,
-     0.88596334, 0.89110856, 0.8957262 , 0.8998218 , 0.90258233,
-     0.90674454, 0.90885515, 0.91105599, 0.913419  , 0.91512417,
-     0.91650356, 0.91786822, 0.91912036, 0.92071845, 0.92246352,
-     0.92353003, 0.92516309, 0.92583118, 0.92670315, 0.92731992,
-     0.92829049, 0.92876626, 0.92921514, 0.93159958, 0.93200776,
-     0.93338429, 0.93406227, 0.93386408, 0.93538568, 0.93648825,
-     0.93742131, 0.9364112 , 0.93565662, 0.93699593, 0.93726374,
-     0.93712524, 0.93809399, 0.93692643, 0.93801692, 0.93788861],
-    bi_pool_1: [0.69831364, 0.74052595, 0.75960914, 0.77660699, 0.78979323,
-     0.80197636, 0.81151493, 0.81983328, 0.82695956, 0.83422744,
-     0.84009923, 0.84444068, 0.8498346 , 0.8524163 , 0.85771024,
-     0.86187498, 0.8657597 , 0.86827036, 0.87060321, 0.87331537,
-     0.87610749, 0.87887166, 0.88042647, 0.88120581, 0.88381023,
-     0.88535286, 0.88591683, 0.88620035, 0.88648276, 0.88829956],
-    bi_pool_2: [0.7748632 , 0.83474082, 0.85963301, 0.87129839, 0.87994647,
-     0.88586913, 0.89110815, 0.89584149, 0.89951106, 0.90360613,
-     0.90638561, 0.90928504, 0.91136175, 0.91342803, 0.91573162,
-     0.91700055, 0.91892035, 0.92125301, 0.92236731, 0.92343254,
-     0.92435981, 0.92597738, 0.9268647 , 0.9277961 , 0.92924409,
-     0.93024885, 0.93152407, 0.93226454, 0.93309338, 0.93492188,
-     0.93542637, 0.93669081, 0.93805486, 0.93831731, 0.94004084,
-     0.93977458, 0.94108627, 0.94078701, 0.94109468, 0.94132021,
-     0.94117988, 0.94227269, 0.94168478, 0.94194963, 0.94170639,
-     0.94286863]
+   barChartData: {
+    multi_cls_acc: 0.9367,
+    multi_mmp_cls: 0.9302,
+    bi_syn_cls: 0.9678,
+    bi_syn_mmp: 0.9670,
+    bi_ant_cls: 0.9500,
+    bi_ant_mmp: 0.9511
    }
   }
  },
@@ -66,18 +28,11 @@ export default {
  methods : {
   // 初始化echartsInstance对象
   initChart () {
-   this.chartInstance = this.$echarts.init(this.$refs.accLineChart_ref);
+   this.chartInstance = this.$echarts.init(this.$refs.accBarChart_ref);
    const initOption = {
     title: {
      top: '5%',
-     text: '二分类模型AUC对比'
-    },
-    tooltip: {
-     trigger: 'axis'
-    },
-    legend: {
-     // data: ['二分类#CLS向量#并列关系', '二分类#CLS向量#转折关系', '二分类#MMP#并列关系', '二分类#MMP#转折关系', '多分类#CLS', '多分类#MMP']
-     top: '5%'
+     text: '成语逻辑推断模型测试集准确率对比'
     },
     grid: {
      left: '1%',
@@ -93,41 +48,32 @@ export default {
     },
     xAxis: {
      type: 'category',
-     boundaryGap: false,
-     data: ['epoch0', 'epoch1', 'epoch2', 'epoch3', 'epoch4', 'epoch5', 'epoch6', 'epoch7',
-      'epoch8','epoch9','epoch10','epoch11','epoch12','epoch13','epoch14',
-      'epoch15','epoch16','epoch17','epoch18','epoch19','epoch20','epoch21',
-      'epoch22','epoch23','epoch24','epoch25','epoch26','epoch27','epoch28',
-      'epoch29','epoch30','epoch31','epoch32','epoch33','epoch34','epoch35',
-      'epoch36','epoch37','epoch38','epoch39','epoch40','epoch41','epoch42',
-      'epoch43','epoch44','epoch45','epoch46','epoch47','epoch48','epoch49',
-      'epoch50','epoch51','epoch52','epoch53','epoch54','epoch55','epoch56', 'epoch57']
+     data: ['多分类 CLS输出结构', '多分类 Mean Max Pool输出结构', '二分类 并列关系 CLS输出结构',
+            '二分类 并列关系 Mean Max Pool输出结构', '二分类 转折关系 CLS输出结构', '二分类 转折关系 Mean Max Pool输出结构'],
+     axisLabel: {
+      interval:0, //强制显示文字
+      show: true,
+     },
     },
     yAxis: {
-     type: 'value'
+     type: 'value',
     },
-    series: [
-     {
-      name: '二分类#CLS#并列关系AUC',
-      type: 'line',
-      data: this.lineData.bi_cls_1
-     },
-     {
-      name: '二分类#CLS#转折关系AUC',
-      type: 'line',
-      data: this.lineData.bi_cls_2
-     },
-     {
-      name: '二分类#MMP#并列关系AUC',
-      type: 'line',
-      data: this.lineData.bi_pool_1
-     },
-     {
-      name: '二分类#MMP#转折关系AUC',
-      type: 'line',
-      data: this.lineData.bi_pool_2
-     },
-    ]
+    series: [{
+     data: [{value: this.barChartData.multi_cls_acc, itemStyle: {color: '#123456'}}, {value: this.barChartData.multi_mmp_cls, itemStyle: {color: '#3CB371'}},
+            {value: this.barChartData.bi_syn_cls, itemStyle: {color: '#CD853F'}}, {value: this.barChartData.bi_syn_mmp, itemStyle: {color: '#FF4500'}},
+            {value: this.barChartData.bi_ant_cls, itemStyle: {color: '#FFD700'}}, {value: this.barChartData.bi_ant_mmp, itemStyle: {color: '#008B8B'}}],
+     type: 'bar',
+     showBackground: true,
+     backgroundStyle: {
+      color: 'rgba(180, 180, 180, 0.2)'
+     }
+    }],
+    tooltip: {
+     trigger: 'axis',
+     axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+      type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+     }
+    },
    };
    this.chartInstance.setOption(initOption);
   },
