@@ -21,14 +21,13 @@ checkpoint_path = './chinese_L-12_H-768_A-12/bert_model.ckpt'
 dict_path = './chinese_L-12_H-768_A-12/vocab.txt'
 
 ifPool = 0      # 控制训练模型 1 - mean max pool; 0 - CLS
-syn_or_ant = 0  # 控制训练并列关系还是转折关系模型 0 - 并列关系; 0 - 转折关系
+syn_or_ant = 1  # 控制训练并列关系还是转折关系模型 0 - 并列关系; 1 - 转折关系
 
 token_dict = {}
 with codecs.open(dict_path, 'r', 'utf-8') as reader:
     for line in reader:
         token = line.strip()
         token_dict[token] = len(token_dict)
-
 
 class OurTokenizer(Tokenizer):
     def _tokenize(self, text):
